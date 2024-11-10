@@ -1,0 +1,52 @@
+body {
+  margin: 0;
+}
+.Header {
+  font-family:'Times New Roman', Times, serif;
+  margin-left: 10px;
+}
+
+.Cards {
+  display: flex;
+}
+.Card {
+  background-color: rgb(255, 255, 255);
+  width: 250px;
+  padding: 10px 20px;
+  border: thin solid black;
+  margin: 10px;
+}
+.Card > img {
+  width: 250px;
+  margin: 0;
+  margin-bottom: 20px;
+  border-radius: 15px;
+}
+
+.name_and_cost {
+  display: flex;
+  line-height: 0.8;
+  align-items: center;
+  margin-bottom: 10px;
+}
+.name_location {
+  margin: 0 auto 0 0;
+  font-family: Georgia, serif;
+  font-size: 26px;
+}
+.price {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: rgba(241, 20, 20, 0.951);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+}
+
+.description {
+  color: rgb(183, 183, 183);
+  letter-spacing: -0.03em;
+  font-size: 16px;
+  line-height: 1;
+  font-family: Georgia, serif;
+
+}
