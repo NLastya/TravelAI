@@ -11,6 +11,9 @@
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --mint-color: #8DD3BB;
+  --grey-text: #112211;
 }
 
 a {
@@ -65,4 +68,16 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.mint-btn {
+  background-color: var(--mint-color);
+  color: black;
+  padding: 17px;
+  font-size: 16px;
+}
+
+.btn-like {
+  border: 1px solid var(--mint-color);
+  padding: 4px;
 }

@@ -1,5 +1,6 @@
 import React from 'react';
-import style from 'card.modules.css'
+import {Rate} from 'antd';
+import style from 'card.modules.css';
 
 const VerticalCard = (props) => {
 
@@ -10,6 +11,12 @@ const VerticalCard = (props) => {
                 <p className={style.locatыion}>
                     <imf src="./geo.svg"/>
                     {props?.location? props?.location: 'Сибирь - Сибирь'}
+                <p className={style.location}>
+                    <imf src="./location.svg"/>
+                    {props?.location ? props?.location : 'Сибирь, ул. Прохорова, 34755'}
+                </p>
+                <p>
+                    <Rate></Rate>
                 </p>
 
                 <div className={style.infoRow}></div>
