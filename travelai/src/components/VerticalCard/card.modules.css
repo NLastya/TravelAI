@@ -1,0 +1,39 @@
+.card {
+    display: flex;
+    flex-direction: row;
+    border-radius: 11.7px;
+    box-sizing: border-box;
+}
+
+.bothInfoDate {
+    width: 100%;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    padding: 23.4px;
+}
+
+.listInfo {
+    display: flex;
+    flex-direction: column;
+    gap: 47px;
+}
+
+.buttons {
+    display: flex;
+    flex-direction: row;
+    gap: 18px;
+}
+
+.location {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--grey-text);
+}
+
+.infoRow {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    flex: 1 0 30%;
+}
