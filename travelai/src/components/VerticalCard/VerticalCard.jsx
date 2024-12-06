@@ -1,15 +1,15 @@
 import React from 'react';
 import style from 'card.modules.css'
 
-
 const VerticalCard = (props) => {
 
     return (<div className={style.card}>
         <div className={style.bothInfoDate}>
             <div className={style.listInfo}>
                 <h3>{props?.name ? props?.name : 'Сибирь Тур№1'}</h3>
-                <p className={style.location}>
-                    <imf src="./like.svg"/>
+                <p className={style.locatыion}>
+                    <imf src="./geo.svg"/>
+                    {props?.location? props?.location: 'Сибирь - Сибирь'}
                 </p>
 
                 <div className={style.infoRow}></div>
