@@ -1,22 +1,40 @@
+h3, p {
+    margin:  0;
+}
+
 .card {
     display: flex;
     flex-direction: row;
     border-radius: 11.7px;
+    height: 250px;
     box-sizing: border-box;
+    background-color: white;
+    box-shadow: 6px 8px 10px 0.5px rgba(217, 217, 217, 0.15);
+}
+
+.card > img {
+    flex: 1 0 200px;
 }
 
 .bothInfoDate {
     width: 100%;
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
     padding: 23.4px;
+}
+
+.bothInfo {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
 .listInfo {
     display: flex;
     flex-direction: column;
-    gap: 47px;
+    gap: 10px;
+    flex: 1 0 70%;
 }
 
 .buttons {
@@ -36,4 +54,11 @@
     flex-direction: row;
     width: 100%;
     flex: 1 0 30%;
+}
+
+
+.date {
+    color: #FF8682;
+    font-size: 30px;
+    font-weight: 600;
 }

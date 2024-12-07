@@ -4,7 +4,7 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: #fbfafa;
   background-color: #242424;
 
   font-synthesis: none;
@@ -54,7 +54,7 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -73,11 +73,21 @@ button:focus-visible {
 .mint-btn {
   background-color: var(--mint-color);
   color: black;
-  padding: 17px;
+  padding: 8px 17px 10px;
   font-size: 16px;
+  border-radius: 4px;
 }
 
 .btn-like {
   border: 1px solid var(--mint-color);
-  padding: 4px;
+  padding: 6px 4.5px 2px 3.5px;
+  width: 41px;
+}
+
+.operations-btn {
+  background-color: var(--mint-color);
+  color: white;
+  height: 120px;
+  border-radius: 10px;
+  flex: 1 0 calc(33% - 12px);
 }

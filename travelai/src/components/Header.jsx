@@ -1,4 +1,4 @@
-import style from './header.modules.css';
+import style from './header.module.css';
 
 const Header = (props) => {
 

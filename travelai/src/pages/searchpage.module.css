@@ -1,0 +1,7 @@
+.main {
+    margin-top: calc(-70px - 40px);
+    padding: 40px 87px 10px;
+    width: 100vw;
+    box-sizing: border-box;
+    min-width: 800px;
+}
