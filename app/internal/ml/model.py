@@ -29,7 +29,7 @@ class Model_API:
         super().__init__(**kwargs)
         self.api_key = api_key
 
-    async def generate(self, text) -> str:
+    def generate(self, text) -> str:
         model = "mistral-large-latest"
 
         client = Mistral(api_key=self.api_key)
@@ -44,7 +44,7 @@ class Model_API:
         return response.choices[0].message.content
 
 
-async def ollama(text):
+def ollama(text) -> str:
     response: ChatResponse = chat(model='llama3', messages=[
         {
             'role': 'user',

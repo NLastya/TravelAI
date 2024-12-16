@@ -2,10 +2,10 @@ from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 
-async def get_links_from_google(query, browser):
+def get_links_from_google(query, browser):
     page = browser.new_page()
-    await page.goto(f'https://www.duckduckgo.com/{query}', timeout=30000)
-    await page.wait_for_load_state('networkidle')
+    page.goto(f'https://www.duckduckgo.com/{query}', timeout=30000)
+    page.wait_for_load_state('networkidle')
 
     soup = BeautifulSoup(page.content(), 'html.parser')
 
@@ -24,10 +24,11 @@ async def get_links_from_google(query, browser):
     return links[:7]
 
 
-async def get_text_from_url(url, browser):
+def get_text_from_url(url, browser):
     page = browser.new_page()
-    await page.goto(url, timeout=5000)
-    await page.wait_for_load_state('networkidle')
+    page.goto(url, timeout=10000)
+
+    page.wait_for_load_state('networkidle')
 
     soup = BeautifulSoup(page.content(), 'html.parser')
     text = soup.get_text()
@@ -35,16 +36,16 @@ async def get_text_from_url(url, browser):
     return text
 
 
-async def get_text(query) -> list:
+def get_text(query) -> list:
     texts = []
 
     with sync_playwright() as p:
-        browser = p.chromium.launch(headless=True)
-        urls = await get_links_from_google(query, browser)
+        browser = p.chromium.launch(headless=True, chromium_sandbox=True)
+        urls = get_links_from_google(query, browser)
 
         for url in urls:
             try:
-                texts.append(await get_text_from_url(url, browser))
+                texts.append(get_text_from_url(url, browser))
             except Exception as e:
                 print(f"Ошибка при извлечении текста с {url}: {e}")
 

@@ -4,7 +4,7 @@ from fastapi.responses import FileResponse
 import asyncio
 import app.internal.ml.rag_fusion as rag
 import app.internal.ml.model as llm
-import app.internal.parsing.parser as parser
+import app.internal.parsing.parser_selenium as parser
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from dataclasses import dataclass
@@ -109,17 +109,22 @@ async def generate(data: Generate):
 
 
 @router.post("/search_location")
-async def generate(data: Search_Location):
-    arr_search = await parser.get_text(f"Куда можно сходить в {data.location}")
+def generate(data: Search_Location):
+    print(data.location)
+    arr_search = parser.get_text(f"Места {data.location}")
 
+    # print(arr_search)
     arr_loc = []
     for text in arr_search:
         for loc in nlp(text):
-            if loc["entity_group"] == "LOC":
+            if loc["entity_group"] == "LOC" and loc["word"] != data.location:
                 arr_loc.append(loc["word"])
 
+    print(arr_loc)
+    print(f"Место для которого мы составляем рассписание: {data.location}.\n Нам известна погода по дням: {"".join([f"{i[0]} - {i[1]},\n" for i in data.weather])}.\n Места которые есть в этом городе: {"".join([f"{i},\n" for i in arr_loc])}\n Выбери лучшее место под погоду, в дождливое время закрытое помещение(музеи) в солнечную более открытое(парки, памятники).\nВыведи только в подобном формате: 01.01-Парк\n02.01-музей\n. Для каждого дня напиши минимум РАЗНЫЕ 3 места")
+
     answer = llm.Model_API(api_key).generate(
-        f"Нам известна погода по дням: {"".join([f"{i[0]} - {i[1]},\n" for i in data.weather])}.\n Выбери лучшее место под погоду, в дождливое время закрытое помещение в солнечную более открытое.\nВыведи только в подобном формате: 01.01-Парк Горькова\n02.01-Галерея\n.")
+        f"Места которые есть в этом городе: {"".join([f"{i},\n" for i in arr_loc])}\n Классифицируй каждое место в открытое(парки, площади) или закрытое(музей, галерея) .\nВыведи только в подобном формате: Парк-открытое\nмузей-закрытое\n.")
     answer = [arr.split("-") for arr in answer.split('\n')]
 
     return {"data": answer}
