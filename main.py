@@ -4,6 +4,8 @@ from pydantic import BaseModel
 import sqlite3
 import json
 from datetime import datetime
+import requests
+from parser import get_weather
 
 # Путь к базе данных
 DB_PATH = "tours.db"
@@ -27,10 +29,11 @@ class Place(BaseModel):
 class Tour(BaseModel):
     tour_id: int
     title: str
-    date: List[str]  # [start, end] в формате 'dd:mm:yyyy'
+    date: List[str]  # [start, end]
     location: str
     rating: float
     relevance: float
+    weather: Optional[str] = None
     places: Optional[List[Place]] = None
 
 
@@ -46,33 +49,38 @@ class GenerateTourRequest(BaseModel):
 def get_connection():
     return sqlite3.connect(DB_PATH)
 
+def Mickhals_turn(data: GenerateTourRequest):
+    url = 'https://9871-178-176-78-152.ngrok-free.app/docs#/default/generate_api_v1_search_location_post'
+    data1 = {
+        'location':data.location,
+        'weather': get_weather(data.data_start, data.data_end, data.location)
+    }
+    response = requests.post(url, json=data1)
+    return response.json()
 
 # Функция для генерации туров
 def generate_tours(data: GenerateTourRequest):
-    conn = get_connection()
-    cursor = conn.cursor()
+    with get_connection() as conn:
+        cursor = conn.cursor()
+        cursor.execute("""
+            SELECT tour_id, title, date_start, date_end, location, rating, relevance, weather
+            FROM tours
+            WHERE location = ? AND date_start >= ? AND date_end <= ?
+        """, (data.location, data.data_start, data.data_end))
+        rows = cursor.fetchall()
 
-    # Ищем туры по указанным параметрам
-    cursor.execute("""
-        SELECT tour_id, title, date_start, date_end, location, rating, relevance
-        FROM tours
-        WHERE location = ? AND date_start >= ? AND date_end <= ?
-    """, (data.location, data.data_start, data.data_end))
-    rows = cursor.fetchall()
+        if not rows:
+            return Mickhals_turn(data)
 
-    # Формируем ответ
-    tours = []
-    for row in rows:
-        tours.append({
+        tours = [{
             "tour_id": row[0],
             "title": row[1],
             "date": [row[2], row[3]],
             "location": row[4],
             "rating": row[5],
-            "relevance": row[6]
-        })
-    conn.commit()
-    conn.close()
+            "relevance": row[6],
+            "weather": row[7]
+        } for row in rows]
     return tours
 
 
@@ -83,7 +91,7 @@ def get_tour_by_id(tour_id: int):
 
     # Получаем информацию о туре
     cursor.execute("""
-        SELECT tour_id, title, date_start, date_end, location, rating, relevance
+        SELECT tour_id, title, date_start, date_end, location, rating, relevance, weather
         FROM tours WHERE tour_id = ?
     """, (tour_id,))
     tour_row = cursor.fetchone()
@@ -121,6 +129,7 @@ def get_tour_by_id(tour_id: int):
         "location": tour_row[4],
         "rating": tour_row[5],
         "relevance": tour_row[6],
+        "weather": tour_row[7],
         "places": places
     }
 
@@ -152,7 +161,6 @@ def get_popular_tours():
     conn.close()
     return popular_tours
 
-
 # Ручка для генерации туров
 @app.post("/generate_tour", response_model=List[Tour])
 def generate_tour(request: GenerateTourRequest):
@@ -167,7 +175,6 @@ def tour(id_tour: int):
     if not tour:
         raise HTTPException(status_code=404, detail="Tour not found")
     return tour
-
 
 # Ручка для получения списка популярных туров
 @app.get("/list_popular", response_model=List[Tour])
