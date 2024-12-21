@@ -1,0 +1,1 @@
+export const HOST_URL = 'https://2351-178-176-78-152.ngrok-free.app';

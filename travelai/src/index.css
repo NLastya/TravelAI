@@ -4,13 +4,16 @@
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
+  background-color: #fbfafa;
   background-color: #242424;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+
+  --mint-color: #8DD3BB;
+  --grey-text: #112211;
 }
 
 a {
@@ -28,6 +31,11 @@ body {
   place-items: center;
   min-width: 320px;
   min-height: 100vh;
+}
+
+body:has([class*="overlay"]){
+  overflow-y: hidden;
+  overflow-x: hidden;
 }
 
 h1 {
@@ -51,7 +59,7 @@ button:hover {
 }
 button:focus,
 button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
+  outline: none;
 }
 
 @media (prefers-color-scheme: light) {
@@ -65,4 +73,56 @@ button:focus-visible {
   button {
     background-color: #f9f9f9;
   }
+}
+
+.mint-btn {
+  background-color: var(--mint-color);
+  color: black;
+  padding: 8px 17px 10px;
+  font-size: 16px;
+  border-radius: 4px;
+}
+
+.btn-like {
+  border: 1px solid var(--mint-color);
+  padding: 6px 4.5px 2px 3.5px;
+  width: 41px;
+}
+
+.operations-btn {
+  background-color: var(--mint-color);
+  color: white;
+  height: 120px;
+  border-radius: 10px;
+  flex: 1 0 calc(33% - 12px);
+}
+
+.ant-select, .ant-select-selector {
+    height: 42px;
+    border: 1px solid black !important;
+    background: white;
+    color: #1C1B1F !important;
+    box-sizing: border-box;
+    /* padding: 2px 10px !important; */
+    border-radius: 2px !important;
+}
+
+.ant-select-selector {
+  height: 42px;
+  border: 1px solid black !important;
+  background: white;
+  color: #1C1B1F !important;
+  box-sizing: border-box;
+  padding: 2px 10px !important;
+  border-radius: 2px !important;
+}
+
+.ant-picker.ant-picker-range {
+  height: 42px;
+  border: 1px solid black !important;
+  background: white;
+  color: #1C1B1F !important;
+  box-sizing: border-box;
+  padding: 2px 10px !important;
+  border-radius: 2px !important
 }
