@@ -6,7 +6,8 @@ import requests
 import re
 import time
 
-
+options = ChromeOptions()
+options.page_load_strategy = 'eager'
 
 def extract_city_and_id(url):
     pattern = r"weather-([a-zA-Z\-]+)-(\d+)/month/"
@@ -20,7 +21,7 @@ def extract_city_and_id(url):
         return None, None
 
 
-def get_city_id(request):
+def get_city_id(request, driver):
     driver.get(f"https://www.google.com/search?q={request}")
     time.sleep(3)
     first_result = driver.find_element(By.CSS_SELECTOR, "h3").find_element(By.XPATH, "..")
@@ -38,16 +39,18 @@ def get_mounth(date):
 
 def get_weather(data_start, data_end, city_request):
     weather_data=[]
-    options = ChromeOptions()
-    options.page_load_strategy = 'eager'
     driver = webdriver.Chrome(options=options)
-    soap = bs4.BeautifulSoup(driver.page_source, "html.parser")
-    DATA = soap.find_all("a", class_ = "row-item row-item-month-date")
+
+
     city_request = city_request + " погода гисметео на месяц"
-    city, city_id = get_city_id(city_request)
+    city, city_id = get_city_id(city_request, driver)
 
     site = f"https://www.gismeteo.ru/weather-{city}-{city_id}/month/"
+
+
     driver.get(site)
+    soap = bs4.BeautifulSoup(driver.page_source, "html.parser")
+    DATA = soap.find_all("a", class_ = "row-item row-item-month-date")
 
 
     for el in DATA:
@@ -64,4 +67,7 @@ def get_weather(data_start, data_end, city_request):
             what_weather = el.get("data-tooltip")
             weather_data.append([date, what_weather])
     return weather_data
-print(get_weather("27.12", "08.01", "магнитогорск"))
+
+if __name__ == '__main__':
+    print(get_weather("27.12", "08.01", "магнитогорск"))
+
