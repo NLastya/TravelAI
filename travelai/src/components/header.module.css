@@ -13,6 +13,7 @@
     border-radius: 10px;
     box-sizing: border-box;
     box-shadow: 6px 8px 10px 0.5px rgba(217, 217, 217, 0.25);
+    z-index: 1;
 
 }
 

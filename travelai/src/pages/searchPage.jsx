@@ -11,36 +11,82 @@ import { HOST_URL } from '../config';
 const SearchPage = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [listTours, setListTour] = useState([{date: '04.01.25'}]);
-    const [form, setForm] = useState({location: '', date: ''})
+    const [form, setForm] = useState({location: '', date: '', user_id: 1})
 
     const [api, contextHolder] = notification.useNotification();
 
-    const listToursMap = listTours.map(item => (<VerticalCard key={item.key} {...item}/>) )
+    const listToursMap = (props?.listTours).map(item => (<VerticalCard key={item.key} {...item}/>) )
 
-
-    useEffect(() => {
-        setIsLoading(true);
+    const handleSubmit = () => {
         fetch(`${HOST_URL}/generate_tour`, {
-            user_id: 1,
-            data_start: '26.01.25',
-            data_end: '30.01.25',
-            location: 'Москва',
-            hobby: ['музеи искусства', 'спортзал'],
-        })
-        .then(res => res.json())
-        .then(res => setListTour(res))
-        .catch(e => {
+            method: 'POST', // Указываем метод запроса
+            headers: {
+              'Content-Type': 'application/json', // Устанавливаем тип контента
+              'ngrok-skip-browser-warning': true,
+            },
+            body: JSON.stringify({ // Преобразуем тело запроса в JSON-строку
+              user_id: 1,
+              data_start: '26.01.25',
+              data_end: '30.01.25',
+              location: 'Москва',
+              hobby: ['музеи искусства', 'спортзал'],
+            }),
+          })
+          .then(res => {
+            if (!res.ok) {
+              throw new Error(`HTTP error! Status: ${res.status}`);
+            }
+            return res.json();
+          })
+          .then(data => setListTour(data))
+          .catch(e => {
             console.log(e);
-            api.error({message: `Код ошибки: ${e.code}`,
-                description: e.message,
-                placement: 'bottomRight'});
-        })
-        setIsLoading(false);
+            api.error({
+              message: `Код ошибки: ${e.code || 'unknown'}`, // Используем шаблонные строки
+              description: e.message,
+              placement: 'bottomRight',
+            });
+          });
+    }
 
-    }, [])
 
-    // if(isLoading)
-    //     return null;
+    // useEffect(() => {
+    //     setIsLoading(true);
+        // fetch(`${HOST_URL}/generate_tour`, {
+        //     method: 'POST', // Указываем метод запроса
+        //     headers: {
+        //       'Content-Type': 'application/json', // Устанавливаем тип контента
+        //       'ngrok-skip-browser-warning': true,
+        //     },
+        //     body: JSON.stringify({ // Преобразуем тело запроса в JSON-строку
+        //       user_id: 1,
+        //       data_start: '26.01.25',
+        //       data_end: '30.01.25',
+        //       location: 'Москва',
+        //       hobby: ['музеи искусства', 'спортзал'],
+        //     }),
+        //   })
+        //   .then(res => {
+        //     if (!res.ok) {
+        //       throw new Error(`HTTP error! Status: ${res.status}`);
+        //     }
+        //     return res.json();
+        //   })
+        //   .then(data => setListTour(data))
+        //   .catch(e => {
+        //     console.log(e);
+        //     api.error({
+        //       message: `Код ошибки: ${e.code || 'unknown'}`, // Используем шаблонные строки
+        //       description: e.message,
+        //       placement: 'bottomRight',
+        //     });
+        //   });
+    //     setIsLoading(false);
+
+    // }, [])
+
+    if(!props?.listTours)
+        return null;
 
 
     return(

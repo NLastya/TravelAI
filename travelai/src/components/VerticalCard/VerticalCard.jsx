@@ -6,7 +6,8 @@ import style from './card.module.css';
 
 const VerticalCard = (props) => {
 
-    return (<div className={style.card}>
+    return (
+    <div className={style.card}>
         <img src={props?.image ? props?.image: '/mock/pic1.jpg'}/>
         <div className={style.bothInfoDate}>
             <div className={style.bothInfo}>

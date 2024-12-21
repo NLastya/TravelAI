@@ -3,11 +3,16 @@ import {Select} from 'antd';
 import style from './modalform.module.css';
 import { notification } from 'antd';
 import { HOST_URL } from '../../config';
-import {useNavigate} from 'react-router-dom'
+import {useNavigate} from 'react-router-dom';
+
+import { DatePicker } from 'antd';
+import dayjs from "dayjs";
+const { RangePicker } = DatePicker;
 
 
-const ModalForm = ({setModal}) => {
-    const [form, setForm] = useState({location: '', date: '', hobies: []});
+const ModalForm = ({setModal, setListTour}) => {
+    const [form, setForm] = useState({location: '', data_start: '2024-11-12', data_end: '2024-11-31', hobies: []});
+    const [formError, setFormError] = useState(false);
 
   
 const options = [
@@ -65,34 +70,47 @@ const options = [
     // { value: 'Фотостудии', label: 'Фотостудии' }
 ];
 
-    const handleChange = (value) => {setForm(prev => ({...prev, hobies: [...prev.hobies, value]}))}
-    const navigate = useNavigate();
+    const handleChange = (value) => {setForm(prev => ({...prev, hobies: [value]}))}
+    // const navigate = useNavigate();
 
     const [api, contextHolder] = notification.useNotification();
 
     const sendForm = () => {
-        fetch(`${HOST_URL}/generate_tour`, {
-            user_id: 1,
-            data_start: '26.01.25',
-            data_end: '30.01.25',
-            location: 'Москва',
-            hobby: ['музеи искусства', 'спортзал'],
-        })
-        .then(res => res.json())
-        .then(res => {
-            setListTour(res);
-            navigate('/tours');
-        }
-    )
-        .catch(e => {
-            console.log(e);
-            // TODO: написать моки чтобы работал переход вне catch
-            navigate('/tours');
-            api.error({message: `Код ошибки: ${e.code}`,
-                description: e.message,
-                placement: 'bottomRight'});
-        })
+        console.log(form)
+        if(!(form.location && form.data_start && form.data_end && form.hobies)) {
+            setFormError(true);
+        } else {
+            fetch(`${HOST_URL}/generate_tour`, {
+                method: 'POST', 
+                headers: {
+                  'Content-Type': 'application/json', 
+                  'ngrok-skip-browser-warning': true,
+                },
+                body: JSON.stringify({ 
+                  user_id: 1,
+                  data_start: '26.01.25',
+                  data_end: '30.01.25',
+                  location: 'Москва',
+                  hobby: ['музеи искусства', 'спортзал'],
+                }),
+              })
+              .then(res => {
+                if (!res.ok) {
+                  throw new Error(`HTTP error! Status: ${res.status}`);
+                }
+                return res.json();
+              })
+              .then(data => setListTour(data))
+              .catch(e => {
+                console.log(e);
+                api.error({
+                  message: `Код ошибки: ${e.code || 'unknown'}`, 
+                  description: e.message,
+                  placement: 'bottomRight',
+                });
+              });
 
+        }
     }
 
     return(
@@ -100,8 +118,18 @@ const options = [
         <div className={style.modal}>
             <h3>Выберите место и даты</h3>
             <label className={style.inputLabel}> Даты отправки и прибытия
-                <input className={style.inputText} value={form?.date}
+                {/* <input className={style.inputText} value={form?.date}
                 onChange={(e) => setForm(prev => ({...prev, date: e.target.value}))}
+                /> */}
+                <RangePicker 
+                value={[dayjs(form?.data_start), dayjs(form?.data_end)]}
+                format="YYYY-MM-DD"
+                allowClear={false}
+                 onChange={(value) => {
+                    setForm(prev => ({...prev, data_start: (value[0]).format('YYYY-MM-DD'), data_end: (value[1]).format('YYYY-MM-DD') }))
+                    console.log((value[0]).format('DD-MM-YYYY'))
+                 }
+                }
                 />
             </label>
             <label className={style.inputLabel}> Город
@@ -112,12 +140,18 @@ const options = [
             <h3>Предпочтения</h3>
             <Select 
             mode='tags'
-            style={{width: '100%'}}
+            style={{width: '100%', height: '42px',
+                border: '1px solid black',
+                background: 'white',
+                color: '#1C1B1F',
+                boxSizing: 'border-box',
+                borderRadius: '2px', }}
             placeholder='Выберите предпочтения'
-            onChange={() => handleChange()}
+            onChange={(value) => handleChange(value)}
             options={options}
             />
             </label>
+            {formError && <span style={{color: 'red', fontSize: '12px'}}>Заполните все поля</span>}
             <button className='mint-btn' onClick={() => sendForm()}>Сгенерировать</button>
         </div>
         <div className={style.overlay} onClick={() => setModal(false)}></div>

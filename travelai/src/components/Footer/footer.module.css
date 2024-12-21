@@ -1,7 +1,7 @@
 .footer {
     display: grid;
     position: absolute;
-    bottom: 0;
+    margin-top: 0px;
     left: 0;
     width: 100vw;
     padding: 20px 47px;
