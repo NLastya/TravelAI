@@ -116,3 +116,13 @@ button:focus-visible {
   padding: 2px 10px !important;
   border-radius: 2px !important;
 }
+
+.ant-picker.ant-picker-range {
+  height: 42px;
+  border: 1px solid black !important;
+  background: white;
+  color: #1C1B1F !important;
+  box-sizing: border-box;
+  padding: 2px 10px !important;
+  border-radius: 2px !important
+}

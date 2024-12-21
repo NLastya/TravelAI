@@ -10,8 +10,8 @@ import dayjs from "dayjs";
 const { RangePicker } = DatePicker;
 
 
-const ModalForm = ({setModal, setListTour}) => {
-    const [form, setForm] = useState({location: '', data_start: '2024-11-12', data_end: '2024-11-31', hobies: []});
+const ModalForm = ({setModal, setListTour, form, setForm}) => {
+    // const [form, setForm] = useState({location: '', data_start: '2024-11-12', data_end: '2024-11-31', hobies: []});
     const [formError, setFormError] = useState(false);
 
   

@@ -7,11 +7,14 @@ import VerticalCard from '../components/VerticalCard/VerticalCard';
 import { notification } from 'antd';
 import Footer from '../components/Footer/Footer'
 import { HOST_URL } from '../config';
+import dayjs from "dayjs";
 
 const SearchPage = (props) => {
+  // props.form, props.setForm
+
     const [isLoading, setIsLoading] = useState(false);
-    const [listTours, setListTour] = useState([{date: '04.01.25'}]);
-    const [form, setForm] = useState({location: '', date: '', user_id: 1})
+    const [listTours, setListTour] = useState([{data: '04.01.25'}]);
+    const [form, setForm] = useState({location: '', data_start: '2024-12-', data_end: '2024-12-30', user_id: 1})
 
     const [api, contextHolder] = notification.useNotification();
 

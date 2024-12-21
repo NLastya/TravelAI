@@ -5,14 +5,14 @@ import { useState } from 'react';
 import ModalForm from '../components/ModalForm/ModalForm';
 
 
-const PersonalPage = ({setListTour}) => {
+const PersonalPage = ({setListTour, form, setForm}) => {
     const [modal, setModal] = useState(false);
 
 
     return(
     <div className="wrap">
     {modal && 
-    <ModalForm setModal={setModal}  setListTour={ setListTour}/>
+    <ModalForm setModal={setModal}  setListTour={ setListTour} setForm={setForm} form={form}/>
     }
     <Header/>
     <div className={style.main}>
