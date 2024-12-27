@@ -13,12 +13,12 @@ const SearchPage = (props) => {
   // props.form, props.setForm
 
     const [isLoading, setIsLoading] = useState(false);
-    const [listTours, setListTour] = useState([{data: '04.01.25'}]);
+    // const [listTours, setListTour] = useState([{data: '04.01.25'}]);
     const [form, setForm] = useState({location: '', data_start: '2024-12-', data_end: '2024-12-30', user_id: 1})
 
     const [api, contextHolder] = notification.useNotification();
 
-    const listToursMap = (props?.listTours).map(item => (<VerticalCard key={item.key} {...item}/>) )
+    const listToursMap = (props?.listTours ?? []).map(item => (<VerticalCard key={item.key} {...item}/>) )
 
     const handleSubmit = () => {
         fetch(`${HOST_URL}/generate_tour`, {
@@ -41,7 +41,7 @@ const SearchPage = (props) => {
             }
             return res.json();
           })
-          .then(data => setListTour(data))
+          .then(data => props.setListTour(data))
           .catch(e => {
             console.log(e);
             api.error({
@@ -88,8 +88,8 @@ const SearchPage = (props) => {
 
     // }, [])
 
-    if(!props?.listTours)
-        return null;
+    // if(!props?.listTours)
+    //     return null;
 
 
     return(
