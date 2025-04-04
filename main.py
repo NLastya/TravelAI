@@ -57,6 +57,15 @@ class GenerateTourRequest(BaseModel):
     location: str
     hobby: List[str]
 
+class Login(BaseModel):
+    login: str
+    password: str
+
+class Register(BaseModel):
+    name: str
+    city: str
+    login: str
+    password: str
 
 # Соединение с базой данных
 def get_connection():
@@ -274,3 +283,15 @@ def tour(id_tours: int):
 def list_popular():
     popular_tours = get_popular_tours()
     return popular_tours
+
+@app.get("/login", response_model=List[Login])
+def login():
+    return {"ans": "OK"}
+
+@app.get("/register", response_model=List[Register])
+def reg():
+    return {"ans": "OK"}
+
+@app.get("/tests")
+def reg():
+    return {"ans": "OK"}
