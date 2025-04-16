@@ -1,0 +1,182 @@
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  width: 100vw;
+}
+
+.Card{
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    padding: 20px;
+    padding-left: 10px;
+    background: white;
+    max-width: 445px;
+    height: 220px;
+
+  }
+  
+  .Name{
+    margin-bottom: 0;
+    margin-top: 0;
+    line-height: 9px;
+    font-size: 16px;
+    font-weight: 600;
+  }
+  
+  .Adress {
+    display: flex;
+    align-items: center;
+    line-height: 9px;
+    margin: 0;
+  }
+  
+  .Pointer{
+    height: 11px;
+  }
+  
+  .Location_adress{
+    font-size: 11px;
+    margin-left: 1px;
+    color: rgb(69, 69, 69);
+    letter-spacing: -0.03em;
+  
+  }
+  
+  .Description{
+    margin-bottom: 15px;
+    margin-top: 0;
+    font-size: 11px
+  
+  }
+  
+  .Base_img {
+    width: 200px;
+    height: 220px;
+    overflow: hidden; 
+  }
+  
+  .Base_img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center center;
+    border-radius: 19.93px;
+  }
+  
+  .Date {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between; 
+    font-size: 11px;
+    letter-spacing: -0.03em;
+    margin: 0 5px;
+  }
+
+  .Duration{
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    margin: 0 7px;
+  }
+  
+  .Date_days {
+    color: rgb(237, 102, 102);
+    font-weight: 700;
+    font-size: 15px;
+    margin: 0;
+  }
+
+  .Count{
+    display: flex;
+    align-items: baseline;
+    gap: 2px;
+  }
+  
+  .Look{
+  
+    background-color: #8DD3BB;
+    border: none;
+    color: black;
+    padding: 10px 40px;
+    text-align: center; 
+    display: inline-block;
+    font-size: 13px; 
+    font-weight: 600;
+    cursor: pointer;
+    border-radius: 3px; 
+    width: 225px;
+    height: 35px;
+  }
+  .Look:hover {
+    background-color: #7fbda7;
+  }
+  
+  .Information {
+     width: 225px;
+  }
+
+
+/* Дата и погода*/
+  .date {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 20px;
+    font-weight: 500;
+    padding: 0 15px;
+    max-width: 205px;
+    margin-top: 30px;
+  }
+
+.date img{
+    width: 33px;
+}
+  
+.divider {
+    display: flex;
+}
+
+.lightDivider {
+    background-color: #C7C6C6;
+    height: 3px;
+    margin-bottom: 15px;
+    width: 263px;
+}
+.darkDivider {
+    background-color: #525252;
+    height: 3px;
+    margin-bottom: 15px;
+    width: 235px;
+}
+
+.str {
+  display:flex;
+  padding: 0 15px;
+}
+
+.contextMenu {
+    height: 60px;
+    width: 145px;
+    border-radius: 6px;
+    background-color: #EAEAEA;
+    padding: 17px 15px;
+    z-index: 1000;
+    box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.3);
+}
+
+.contextMenu ul {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  list-style-type: none;
+  margin: 0;
+  padding: 0;
+}
+
+.contextMenu li {
+    font-size: 12px;
+    cursor: pointer;
+}
