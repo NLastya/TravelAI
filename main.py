@@ -1,5 +1,5 @@
-from fastapi import FastAPI, HTTPException
-from typing import List, Optional
+from fastapi import FastAPI, HTTPException, Query
+from typing import List, Optional, Dict, Any
 from pydantic import BaseModel
 import sqlite3
 import json
@@ -11,6 +11,7 @@ import datetime
 import hashlib
 import os
 from dotenv import load_dotenv
+import random
 
 # Загрузка переменных окружения
 load_dotenv()
@@ -74,6 +75,18 @@ class GenerateUrlTourRequest(BaseModel):
     data_end: str
 
 
+class TourRecommendationRequest(BaseModel):
+    user_id: int
+    interests: Optional[List[str]] = None
+    preferred_locations: Optional[List[str]] = None
+    max_results: Optional[int] = 5
+
+
+class RecommendationResponse(BaseModel):
+    tours: List[Tour]
+    message: str
+
+
 class Login(BaseModel):
     login: str
     password: str
@@ -97,6 +110,22 @@ class Register(BaseModel):
 class RegisterResponse(BaseModel):
     status: str
     user_id: Optional[int] = None
+    message: Optional[str] = None
+
+
+class UserSurvey(BaseModel):
+    user_id: int
+    interests: List[str]
+    visited_cities: List[str]
+    travel_frequency: Optional[str] = None  # например: "редко", "часто", "несколько раз в год"
+    preferred_climate: Optional[str] = None  # например: "теплый", "холодный", "умеренный"
+    preferred_activities: Optional[List[str]] = None  # например: ["пляжный отдых", "экскурсии", "горные лыжи"]
+    travel_budget: Optional[str] = None  # например: "низкий", "средний", "высокий"
+    additional_info: Optional[Dict[str, Any]] = None  # любая дополнительная информация
+
+
+class SurveyResponse(BaseModel):
+    status: str
     message: Optional[str] = None
 
 
@@ -158,8 +187,203 @@ def init_db():
     )
     ''')
     
+    # Создаем таблицу интересов пользователей, если её нет
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_interests (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        interest TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Создаем таблицу категорий туров, если её нет
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS tour_categories (
+        id INTEGER PRIMARY KEY,
+        tour_id INTEGER,
+        category TEXT NOT NULL,
+        FOREIGN KEY (tour_id) REFERENCES tours(tour_id)
+    )
+    ''')
+    
+    # Создаем таблицу посещенных городов, если её нет
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS visited_cities (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        city_name TEXT NOT NULL,
+        visit_date TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Создаем таблицу для анкет пользователей, если её нет
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_surveys (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER UNIQUE,
+        travel_frequency TEXT,
+        preferred_climate TEXT,
+        travel_budget TEXT,
+        additional_info TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Создаем таблицу для предпочитаемых активностей пользователей
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS preferred_activities (
+        id INTEGER PRIMARY KEY,
+        user_id INTEGER,
+        activity TEXT NOT NULL,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
     conn.commit()
     conn.close()
+
+
+# Функция для сохранения анкеты пользователя
+def save_user_survey(survey_data: UserSurvey):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Проверяем существование пользователя
+        cursor.execute("SELECT user_id FROM users WHERE user_id = ?", (survey_data.user_id,))
+        if not cursor.fetchone():
+            return {"status": "error", "message": "Пользователь не найден"}
+        
+        # Сохраняем интересы пользователя
+        save_user_interests(survey_data.user_id, survey_data.interests)
+        
+        # Сохраняем посещенные города
+        # Сначала удаляем старые записи
+        cursor.execute("DELETE FROM visited_cities WHERE user_id = ?", (survey_data.user_id,))
+        
+        # Добавляем новые записи
+        for city in survey_data.visited_cities:
+            cursor.execute('''
+            INSERT INTO visited_cities (user_id, city_name, visit_date)
+            VALUES (?, ?, ?)
+            ''', (survey_data.user_id, city, datetime.datetime.now().strftime("%Y-%m-%d")))
+        
+        # Обновляем или добавляем данные анкеты
+        cursor.execute("SELECT id FROM user_surveys WHERE user_id = ?", (survey_data.user_id,))
+        if cursor.fetchone():
+            # Обновляем существующую анкету
+            cursor.execute('''
+            UPDATE user_surveys
+            SET travel_frequency = ?, preferred_climate = ?, travel_budget = ?, additional_info = ?
+            WHERE user_id = ?
+            ''', (
+                survey_data.travel_frequency,
+                survey_data.preferred_climate,
+                survey_data.travel_budget,
+                json.dumps(survey_data.additional_info) if survey_data.additional_info else None,
+                survey_data.user_id
+            ))
+        else:
+            # Создаем новую анкету
+            cursor.execute('''
+            INSERT INTO user_surveys (user_id, travel_frequency, preferred_climate, travel_budget, additional_info)
+            VALUES (?, ?, ?, ?, ?)
+            ''', (
+                survey_data.user_id,
+                survey_data.travel_frequency,
+                survey_data.preferred_climate,
+                survey_data.travel_budget,
+                json.dumps(survey_data.additional_info) if survey_data.additional_info else None
+            ))
+        
+        # Обновляем предпочитаемые активности
+        if survey_data.preferred_activities:
+            # Удаляем старые активности
+            cursor.execute("DELETE FROM preferred_activities WHERE user_id = ?", (survey_data.user_id,))
+            
+            # Добавляем новые активности
+            for activity in survey_data.preferred_activities:
+                cursor.execute('''
+                INSERT INTO preferred_activities (user_id, activity)
+                VALUES (?, ?)
+                ''', (survey_data.user_id, activity))
+        
+        conn.commit()
+        return {"status": "success", "message": "Анкета успешно сохранена"}
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+
+# Функция для получения анкеты пользователя
+def get_user_survey(user_id: int):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Получаем интересы пользователя
+        interests = get_user_interests(user_id)
+        
+        # Получаем посещенные города
+        cursor.execute("SELECT city_name FROM visited_cities WHERE user_id = ?", (user_id,))
+        visited_cities = [row[0] for row in cursor.fetchall()]
+        
+        # Получаем данные анкеты
+        cursor.execute('''
+        SELECT travel_frequency, preferred_climate, travel_budget, additional_info
+        FROM user_surveys
+        WHERE user_id = ?
+        ''', (user_id,))
+        
+        survey_row = cursor.fetchone()
+        
+        # Получаем предпочитаемые активности
+        cursor.execute("SELECT activity FROM preferred_activities WHERE user_id = ?", (user_id,))
+        preferred_activities = [row[0] for row in cursor.fetchall()]
+        
+        if survey_row:
+            survey_data = {
+                "user_id": user_id,
+                "interests": interests,
+                "visited_cities": visited_cities,
+                "travel_frequency": survey_row[0],
+                "preferred_climate": survey_row[1],
+                "travel_budget": survey_row[2],
+                "preferred_activities": preferred_activities,
+                "additional_info": json.loads(survey_row[3]) if survey_row[3] else None
+            }
+            return survey_data
+        else:
+            # Если анкета еще не заполнена, возвращаем только базовые данные
+            return {
+                "user_id": user_id,
+                "interests": interests,
+                "visited_cities": visited_cities,
+                "preferred_activities": preferred_activities
+            }
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+
+# Функция для получения списка посещенных городов пользователя
+def get_visited_cities(user_id: int) -> List[str]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT city_name FROM visited_cities WHERE user_id = ?", (user_id,))
+        cities = [row[0] for row in cursor.fetchall()]
+        return cities
+    except Exception as e:
+        return []
+    finally:
+        conn.close()
 
 
 # Функция регистрации пользователя
@@ -226,6 +450,272 @@ def login_user(login_data: Login):
             return {"status": "error", "message": "Неверный логин или пароль"}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
+
+
+# Функция для сохранения интересов пользователя
+def save_user_interests(user_id: int, interests: List[str]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Удаляем старые интересы пользователя
+        cursor.execute("DELETE FROM user_interests WHERE user_id = ?", (user_id,))
+        
+        # Добавляем новые интересы
+        for interest in interests:
+            cursor.execute('''
+            INSERT INTO user_interests (user_id, interest)
+            VALUES (?, ?)
+            ''', (user_id, interest))
+            
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+# Функция для получения интересов пользователя
+def get_user_interests(user_id: int) -> List[str]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT interest FROM user_interests WHERE user_id = ?", (user_id,))
+        interests = [row[0] for row in cursor.fetchall()]
+        return interests
+    except Exception as e:
+        return []
+    finally:
+        conn.close()
+
+
+# Функция для сохранения категорий тура
+def save_tour_categories(tour_id: int, categories: List[str]):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        # Удаляем старые категории
+        cursor.execute("DELETE FROM tour_categories WHERE tour_id = ?", (tour_id,))
+        
+        # Добавляем новые категории
+        for category in categories:
+            cursor.execute('''
+            INSERT INTO tour_categories (tour_id, category)
+            VALUES (?, ?)
+            ''', (tour_id, category))
+            
+        conn.commit()
+        return True
+    except Exception as e:
+        conn.rollback()
+        return False
+    finally:
+        conn.close()
+
+
+# Функция для получения категорий тура
+def get_tour_categories(tour_id: int) -> List[str]:
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        cursor.execute("SELECT category FROM tour_categories WHERE tour_id = ?", (tour_id,))
+        categories = [row[0] for row in cursor.fetchall()]
+        return categories
+    except Exception as e:
+        return []
+    finally:
+        conn.close()
+
+
+# Функция для получения рекомендаций туров с учетом анкеты пользователя
+def get_recommended_tours(user_id: int, interests: List[str] = None, 
+                          preferred_locations: List[str] = None, max_results: int = 5):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    recommended_tours = []
+    
+    try:
+        # Если интересы не указаны, получаем их из БД
+        if not interests:
+            interests = get_user_interests(user_id)
+        
+        # Если предпочтительные локации не указаны, используем все доступные
+        if not preferred_locations:
+            # Получаем список локаций из предыдущих туров пользователя
+            cursor.execute('''
+            SELECT DISTINCT t.location FROM tours t
+            JOIN tour_categories tc ON t.tour_id = tc.tour_id
+            JOIN user_interests ui ON tc.category = ui.interest
+            WHERE ui.user_id = ?
+            ''', (user_id,))
+            
+            preferred_locations = [row[0] for row in cursor.fetchall()]
+            
+            # Если локаций нет, добавляем популярные локации
+            if not preferred_locations:
+                cursor.execute('''
+                SELECT location, COUNT(*) as cnt 
+                FROM tours 
+                GROUP BY location 
+                ORDER BY cnt DESC
+                LIMIT 5
+                ''')
+                preferred_locations = [row[0] for row in cursor.fetchall()]
+        
+        # Получаем список городов, которые пользователь уже посетил
+        visited_cities = get_visited_cities(user_id)
+        
+        # Строим запрос с учетом интересов и локаций
+        # Исключаем города, которые пользователь уже посетил
+        query = '''
+        SELECT DISTINCT t.tour_id, t.title, t.date_start, t.date_end, t.location, t.rating, t.relevance,
+               (CASE WHEN tc.category IS NOT NULL THEN 1 ELSE 0 END) as interest_match,
+               (CASE WHEN t.location IN ({}) THEN 1 ELSE 0 END) as location_match,
+               t.rating * 0.5 + (CASE WHEN tc.category IS NOT NULL THEN 1 ELSE 0 END) * 0.3 + 
+               (CASE WHEN t.location IN ({}) THEN 1 ELSE 0 END) * 0.2 as score
+        FROM tours t
+        LEFT JOIN tour_categories tc ON t.tour_id = tc.tour_id AND tc.category IN ({})
+        WHERE t.location NOT IN ({})
+        ORDER BY score DESC
+        LIMIT ?
+        '''
+        
+        # Подготавливаем параметры для запроса
+        placeholders_interests = ', '.join(['?' for _ in interests]) if interests else "''"
+        placeholders_locations = ', '.join(['?' for _ in preferred_locations]) if preferred_locations else "''"
+        placeholders_visited = ', '.join(['?' for _ in visited_cities]) if visited_cities else "''"
+        
+        query = query.format(placeholders_locations, placeholders_locations, placeholders_interests, placeholders_visited if visited_cities else "''")
+        
+        # Параметры запроса
+        params = []
+        if preferred_locations:
+            params.extend(preferred_locations)
+            params.extend(preferred_locations)
+        if interests:
+            params.extend(interests)
+        if visited_cities:
+            params.extend(visited_cities)
+        params.append(max_results)
+        
+        if not interests and not preferred_locations:
+            # Если нет интересов и предпочтительных локаций, возвращаем топ рейтинговые туры
+            query = '''
+            SELECT tour_id, title, date_start, date_end, location, rating, relevance
+            FROM tours
+            WHERE location NOT IN ({})
+            ORDER BY rating DESC, relevance DESC
+            LIMIT ?
+            '''.format(placeholders_visited if visited_cities else "''")
+            params = []
+            if visited_cities:
+                params.extend(visited_cities)
+            params.append(max_results)
+        
+        cursor.execute(query, params)
+        rows = cursor.fetchall()
+        
+        for row in rows:
+            tour_id = row[0]
+            tour = get_tour_by_id(tour_id)
+            if tour:
+                recommended_tours.append(tour)
+        
+        # Если рекомендаций мало, добавляем популярные туры
+        if len(recommended_tours) < max_results:
+            remaining = max_results - len(recommended_tours)
+            
+            # Исключаем уже выбранные и посещенные города
+            exclude_conditions = []
+            exclude_params = []
+            
+            if recommended_tours:
+                exclude_conditions.append("tour_id NOT IN ({})".format(', '.join([str(t['tour_id']) for t in recommended_tours])))
+            
+            if visited_cities:
+                exclude_conditions.append("location NOT IN ({})".format(', '.join(['?' for _ in visited_cities])))
+                exclude_params.extend(visited_cities)
+            
+            where_clause = " WHERE " + " AND ".join(exclude_conditions) if exclude_conditions else ""
+            
+            query = f'''
+            SELECT tour_id FROM tours 
+            {where_clause}
+            ORDER BY rating DESC, relevance DESC
+            LIMIT ?
+            '''
+            
+            exclude_params.append(remaining)
+            
+            cursor.execute(query, exclude_params)
+            
+            additional_ids = cursor.fetchall()
+            for row in additional_ids:
+                tour_id = row[0]
+                tour = get_tour_by_id(tour_id)
+                if tour:
+                    recommended_tours.append(tour)
+        
+        survey_message = "на основе вашей анкеты" if visited_cities or interests else ""
+        
+        return {
+            "tours": recommended_tours,
+            "message": f"Рекомендации сформированы {survey_message} с учетом ваших интересов и предпочтений." if interests or preferred_locations else "Рекомендованы популярные туры."
+        }
+    except Exception as e:
+        return {
+            "tours": get_fallback_recommendations(max_results, visited_cities),
+            "message": f"Используем стандартные рекомендации. Ошибка: {str(e)}"
+        }
+    finally:
+        conn.close()
+
+
+# Функция для получения резервных рекомендаций в случае ошибки
+def get_fallback_recommendations(max_results: int = 5, visited_cities: List[str] = None):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    try:
+        where_clause = ""
+        params = []
+        
+        if visited_cities:
+            where_clause = "WHERE location NOT IN ({})".format(', '.join(['?' for _ in visited_cities]))
+            params.extend(visited_cities)
+        
+        query = f'''
+        SELECT tour_id FROM tours 
+        {where_clause}
+        ORDER BY rating DESC, relevance DESC
+        LIMIT ?
+        '''
+        
+        params.append(max_results)
+        
+        cursor.execute(query, params)
+        
+        rows = cursor.fetchall()
+        recommendations = []
+        
+        for row in rows:
+            tour_id = row[0]
+            tour = get_tour_by_id(tour_id)
+            if tour:
+                recommendations.append(tour)
+        
+        # Если и здесь ничего не нашли, возвращаем пустой список
+        return recommendations
+    except:
+        return []
     finally:
         conn.close()
 
@@ -435,6 +925,10 @@ def generate_tours(data: GenerateTourRequest):
             # Сохраняем тур в базу данных
             tour_id = save_tour_to_db(tour_data)
             
+            # Если у пользователя есть хобби, сохраняем их как категории тура
+            if data.hobby:
+                save_tour_categories(tour_id, data.hobby)
+            
             # Получаем полные данные о сохраненном туре
             tour = get_tour_by_id(tour_id)
             if tour:
@@ -580,6 +1074,61 @@ def tour(tour_id: int):
 def list_popular():
     popular_tours = get_popular_tours()
     return popular_tours
+
+
+# Ручка для получения рекомендаций туров
+@app.post("/recommend_tours", response_model=RecommendationResponse)
+def recommend_tours(request: TourRecommendationRequest):
+    recommendations = get_recommended_tours(
+        user_id=request.user_id,
+        interests=request.interests,
+        preferred_locations=request.preferred_locations,
+        max_results=request.max_results or 5
+    )
+    return recommendations
+
+
+# Ручка для получения рекомендаций по интересам пользователя
+@app.get("/user_recommendations/{user_id}", response_model=RecommendationResponse)
+def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
+    # Получаем интересы пользователя из базы данных
+    interests = get_user_interests(user_id)
+    
+    # Получаем рекомендации на основе интересов
+    recommendations = get_recommended_tours(
+        user_id=user_id,
+        interests=interests,
+        max_results=max_results
+    )
+    return recommendations
+
+
+# Ручка для сохранения интересов пользователя
+@app.post("/user_interests/{user_id}")
+def save_interests(user_id: int, interests: List[str]):
+    success = save_user_interests(user_id, interests)
+    if success:
+        return {"status": "success", "message": "Интересы пользователя сохранены"}
+    else:
+        raise HTTPException(status_code=500, detail="Ошибка при сохранении интересов")
+
+
+# Ручка для сохранения анкеты пользователя
+@app.post("/user_survey", response_model=SurveyResponse)
+def save_survey(survey: UserSurvey):
+    result = save_user_survey(survey)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return result
+
+
+# Ручка для получения анкеты пользователя
+@app.get("/user_survey/{user_id}")
+def get_survey(user_id: int):
+    survey = get_user_survey(user_id)
+    if isinstance(survey, dict) and survey.get("status") == "error":
+        raise HTTPException(status_code=400, detail=survey["message"])
+    return survey
 
 
 @app.post("/login", response_model=LoginResponse)
