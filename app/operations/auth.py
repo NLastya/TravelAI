@@ -1,6 +1,7 @@
 import hashlib
-from database import get_connection
-import models
+from app.database.database import get_connection
+from app.database import models
+
 
 def hash_password(password: str) -> str:
     """Hash a password using SHA-256"""

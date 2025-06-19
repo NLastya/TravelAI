@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-DB_PATH = "tours.db"
+DB_PATH = "../../tours.db"
 
 def get_connection():
     """Create and return a database connection"""

@@ -1,8 +1,6 @@
 from typing import List
-import random
-from database import get_connection
-import models
-from tour_operations import get_tour_by_id
+from app.database.database import get_connection
+from app.operations.tour_operations import get_tour_by_id
 
 def get_recommended_tours(user_id: int, interests: List[str] = None, 
                          preferred_locations: List[str] = None, max_results: int = 5):

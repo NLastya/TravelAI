@@ -1,8 +1,7 @@
-import json
-import datetime
 from typing import List
-from database import get_connection
-import models
+from app.database.database import get_connection
+from app.database import models
+
 
 def save_user_interests(user_id: int, interests: List[str]):
     """Save user interests to database"""

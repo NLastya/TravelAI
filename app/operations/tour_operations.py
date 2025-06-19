@@ -1,7 +1,6 @@
 from typing import List
-from database import get_connection
-import models
-import requests
+from app.database.database import get_connection
+from app.database import models
 import os
 from dotenv import load_dotenv
 
