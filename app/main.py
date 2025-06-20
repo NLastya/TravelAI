@@ -1,13 +1,13 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
-from app.database import models
-from app.database.database import init_db
-from app.operations import register_user, login_user
-from app.operations.user_operations import save_user_interests, save_user_survey, get_user_survey
-from app.operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
-from app.operations.recommendations import get_recommended_tours, get_fallback_recommendations
-from app.parsing import parser
+from schemas import models
+from database.database import init_db
+# from operations import register_user, login_user
+from operations.user_operations import save_user_interests, save_user_survey, get_user_survey
+from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
+from operations.recommendations import get_recommended_tours, get_fallback_recommendations
+from parsing import parser
 import requests
 import os
 from dotenv import load_dotenv

@@ -1,6 +1,6 @@
 import hashlib
-from app.database.database import get_connection
-from app.database import models
+from database.database import get_connection
+from schemas import models
 
 
 def hash_password(password: str) -> str:
