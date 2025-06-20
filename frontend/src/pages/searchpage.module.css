@@ -1,0 +1,16 @@
+.main {
+    margin-top: calc(-70px - 40px);
+    padding: 40px 87px 10px;
+    width: 100vw;
+    box-sizing: border-box;
+    min-width: 800px;
+    min-height: 70vh;
+    margin-top: 70px;
+    overflow-x: hidden;
+}
+
+.cardsContainer {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
