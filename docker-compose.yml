@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  backend:
+    build: .  # Использует ваш Dockerfile
+    ports:
+      - "8000:8000"
+    depends_on:
+      - redis  # Зависит от Redis
+    environment:
+      - REDIS_HOST=redis  # Теперь host='redis' в коде
+
+  redis:
+    image: redis
+    ports:
+      - "6379:6379"

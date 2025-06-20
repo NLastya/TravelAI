@@ -1,6 +1,8 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import List
 from fastapi.middleware.cors import CORSMiddleware
+
+from operations.auth import login_user, register_user
 from schemas import models
 from database.database import init_db
 # from operations import register_user, login_user
@@ -11,6 +13,8 @@ from parsing import parser
 import requests
 import os
 from dotenv import load_dotenv
+from database.redis_client import redis_client
+import json
 
 load_dotenv()
 API_URL = os.getenv('API_URL', 'http://127.0.0.1:8002/api/v1/search_location')
@@ -75,15 +79,27 @@ def generate_url_tour(request: models.GenerateUrlTourRequest):
 @app.get("/tour/{tour_id}", response_model=models.Tour)
 def tour(tour_id: int):
     """Get tour by ID"""
+    cache_key = f"tour:{tour_id}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return models.Tour(**json.loads(cached))
     tour = get_tour_by_id(tour_id)
     if not tour:
         raise HTTPException(status_code=404, detail="Tour not found")
+    redis_client.set(cache_key, tour.json(), ex=600)  # 10 минут
     return tour
 
 @app.get("/list_popular", response_model=List[models.Tour])
 def list_popular():
     """Get list of popular tours"""
-    return get_popular_tours()
+    cache_key = "popular_tours"
+    cached = redis_client.get(cache_key)
+    if cached:
+        tours = [models.Tour(**item) for item in json.loads(cached)]
+        return tours
+    tours = get_popular_tours()
+    redis_client.set(cache_key, json.dumps([tour.dict() for tour in tours]), ex=600)
+    return tours
 
 # Recommendation endpoints
 @app.post("/recommend_tours", response_model=models.RecommendationResponse)
@@ -103,12 +119,18 @@ def recommend_tours(request: models.TourRecommendationRequest):
 @app.get("/user_recommendations/{user_id}", response_model=models.RecommendationResponse)
 def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
     """Get personalized tour recommendations for user"""
+    cache_key = f"user_recommendations:{user_id}:{max_results}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return models.RecommendationResponse(**json.loads(cached))
     try:
         recommended_tours = get_recommended_tours(user_id, max_results=max_results)
         if not recommended_tours:
             # Fallback to popular tours if no personalized recommendations
             recommended_tours = get_fallback_recommendations(max_results)
-        return models.RecommendationResponse(tours=recommended_tours)
+        response = models.RecommendationResponse(tours=recommended_tours, message="OK")
+        redis_client.set(cache_key, response.json(), ex=300)  # 5 минут
+        return response
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
@@ -132,9 +154,14 @@ def save_survey(survey: models.UserSurvey):
 @app.get("/user_survey/{user_id}")
 def get_survey(user_id: int):
     """Get user survey data"""
+    cache_key = f"user_survey:{user_id}"
+    cached = redis_client.get(cache_key)
+    if cached:
+        return json.loads(cached)
     result = get_user_survey(user_id)
     if result["status"] == "error":
         raise HTTPException(status_code=404, detail=result["message"])
+    redis_client.set(cache_key, json.dumps(result["data"]), ex=600)
     return result["data"]
 
 # Authentication endpoints
@@ -159,3 +186,12 @@ def register_endpoint(register_data: models.Register):
 def tests():
     """Test endpoint"""
     return {"status": "ok", "message": "API is working"}
+
+@app.get("/test-redis")
+def test_redis():
+    try:
+        redis_client.set("test_key", "Hello from Backend!")
+        value = redis_client.get("test_key")
+        return {"status": "success", "value": value}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}

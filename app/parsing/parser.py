@@ -62,12 +62,14 @@ def main(location):
             meow = get_mounth(date)
             date = date.replace("дек", "")
             date = date.replace("янв", "")
-        print(f"{"" if int(date) >= 10 else 0}{int(date)}.{"" if meow >= 10 else 0}{meow}", end=" ")
+        # Исправленные f-строки с разными кавычками
+        print(f"{'' if int(date) >= 10 else 0}{int(date)}.{'' if meow >= 10 else 0}{meow}", end=" ")
         maxt = el.find("div", class_="maxt").get_text(strip=True)
         mint = el.find("div", class_="mint").get_text(strip=True)
         print(f"Макс: {maxt} Мин: {mint}", end=" ")
         print(el.get("data-tooltip"))
-        ans.append([f"{"" if int(date) >= 10 else 0}{int(date)}.{"" if meow >= 10 else 0}{meow}", el.get("data-tooltip")])
+        ans.append(
+            [f"{'' if int(date) >= 10 else 0}{int(date)}.{'' if meow >= 10 else 0}{meow}", el.get("data-tooltip")])
 
     return ans
 
@@ -84,15 +86,16 @@ if __name__ == '__main__':
 
     DATA = soap.find_all("a", class_ = "row-item row-item-month-date")
 
-
     for el in DATA:
-        date = el.find("div", class_ = "date").get_text(strip = True)
-        if len(date)>2:
+        date = el.find("div", class_="date").get_text(strip=True)
+        if len(date) > 2:
             meow = get_mounth(date)
-            date = date.replace("дек", "")
-            date = date.replace("янв", "")
-        print(f"{int(date)}.{"" if meow >= 10 else 0}{meow}", end =" ")
-        maxt = el.find("div", class_ = "maxt").get_text(strip = True)
-        mint = el.find("div", class_ = "mint").get_text(strip = True)
-        print(f"Макс: {maxt} Мин: {mint}",end = " ")
+            date = date.replace("дек", "").replace("янв", "")
+
+        # Исправленная f-строка: заменяем вложенные "" на '' или используем форматирование
+        print(f"{int(date)}.{'' if meow >= 10 else 0}{meow}", end=" ")
+
+        maxt = el.find("div", class_="maxt").get_text(strip=True)
+        mint = el.find("div", class_="mint").get_text(strip=True)
+        print(f"Макс: {maxt} Мин: {mint}", end=" ")
         print(el.get("data-tooltip"))
