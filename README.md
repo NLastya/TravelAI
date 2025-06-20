@@ -29,3 +29,8 @@
 ```bash
   uvicorn main:app --port 8000 --reload
 ```
+
+Redis
+```bash
+  docker run --name my-redis -d -p 6379:6379 redis
+```
