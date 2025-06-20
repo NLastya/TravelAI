@@ -108,3 +108,8 @@ class UserSurvey(BaseModel):
 class SurveyResponse(BaseModel):
     status: str
     message: Optional[str] = None
+
+
+class FavoriteRequest(BaseModel):
+    user_id: int
+    tour_id: int

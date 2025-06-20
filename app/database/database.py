@@ -57,6 +57,18 @@ def init_db():
     )
     ''')
     
+    # Create user_favorites table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_favorites (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        user_id INTEGER,
+        tour_id INTEGER,
+        FOREIGN KEY (user_id) REFERENCES users(user_id),
+        FOREIGN KEY (tour_id) REFERENCES tours(tour_id),
+        UNIQUE(user_id, tour_id)
+    )
+    ''')
+    
     # Create user surveys table (NEW STRUCTURE)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_surveys (
