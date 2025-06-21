@@ -1,0 +1,103 @@
+.main {
+    position: relative;
+    top: 0;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: center;
+    margin: 10px 102px;
+    min-width: 1200px;
+}
+
+.messages {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    display: flex;
+    flex-direction: column;
+}
+
+.leftSide{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.carousel{
+    top: -400px;
+    height: 60vh;
+    width: 40vw;
+}
+
+.img {
+    min-height: 60vh;
+    /* height: 96vh;
+    width: 40vw; */
+    object-fit: fill;
+}
+
+.inputContainer{
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    align-items: flex-end;
+}
+
+.inputLabel {
+    font-size: 14px;
+    color: #112211;
+    font-weight: 200;
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    flex: 1 0 calc(50% - 12px);
+}
+
+.inputText {
+    height: 42px;
+    border: 1px solid black;
+    background: white;
+    color: #1C1B1F;
+    box-sizing: border-box;
+    padding: 2px 10px;
+    border-radius: 2px;
+
+}
+
+.checker {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+}
+
+.dangerText {
+    text-decoration: none;
+    color: #FF8682;
+}
+
+.dangerText:visited, .dangerText:focus {
+    text-decoration: none;
+    color: #FF8682;
+}
+
+.centerText {
+    text-align: center;
+}
+
+.operations {
+    display: flex;
+    flex-direction: row;
+    gap: 20px;
+    justify-content: space-between;
+}
+
+.operationsBtn {
+    background-color: transparent;
+    color: white;
+    height: 120px;
+    border-radius: 10px;
+    flex: 1 0 calc(33% - 12px);
+    border: 1px solid var(--mint-color);
+    height: 52px;
+}

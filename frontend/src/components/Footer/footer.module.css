@@ -1,0 +1,14 @@
+.footer {
+    display: grid;
+    /* position: absolute; */
+    margin-top: 0px;
+    left: 0;
+    width: 100%;
+    padding: 20px 47px;
+    grid-template-columns: 1fr 1fr 1fr 1fr 1fr;
+    grid-template-rows: 1fr 1fr 1fr 1fr 1fr;
+    /* TODO: занести в цвет в index.css */
+    background-color: #5DC1B0;
+    box-sizing: border-box;
+    bottom: 0;
+}
