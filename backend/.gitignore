@@ -103,7 +103,7 @@ cython_debug/
 .idea/
 
 # SQLite database
-*.db
+
 
 # dotenv environment variables
 .env

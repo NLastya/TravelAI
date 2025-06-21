@@ -8,7 +8,9 @@ import time
 
 options = ChromeOptions()
 options.page_load_strategy = 'eager'
-# options.add_argument("--headless=new")
+options.add_argument("--headless=new")
+options.add_argument("--no-sandbox")
+options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
 
 
