@@ -5,7 +5,6 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f05a9495-5448-4a3a-ad99-2263548aac7c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.idea/TravelAI.iml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/app/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/database/database.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
@@ -49,11 +48,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\backend" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\operations" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\main" />
-      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\database" />
     </key>
   </component>
   <component name="SharedIndexes">

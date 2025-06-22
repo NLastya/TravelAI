@@ -133,3 +133,32 @@ class CityViewEvent(BaseModel):
 class CityViewResponse(BaseModel):
     status: str
     message: Optional[str] = None
+
+
+class CityRating(BaseModel):
+    user_id: int
+    city_name: str
+    rating: int  # 1-5 звезд
+
+
+class CityRatingResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+
+
+class ReadyCity(BaseModel):
+    id: Optional[int] = None
+    city: str
+    federal_district: Optional[str] = None
+    region: Optional[str] = None
+    fias_level: Optional[int] = None
+    capital_marker: Optional[int] = None
+    population: Optional[int] = None
+    foundation_year: Optional[int] = None
+    features: Optional[str] = None
+
+
+class ReadyCityResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+    data: Optional[ReadyCity] = None

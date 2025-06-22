@@ -6,11 +6,12 @@ from operations.auth import login_user, register_user
 from schemas import models
 from database.database import init_db
 # from operations import register_user, login_user
-from operations.user_operations import save_user_interests, save_user_survey, get_user_survey
+from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings
 from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
 from operations.recommendations import get_recommended_tours, get_fallback_recommendations
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
 from operations.analytics_operations import start_city_view, end_city_view, get_user_city_analytics, get_active_city_views
+from operations.city_operations import add_ready_city, get_ready_city
 from parsing import parser
 import requests
 import os
@@ -289,3 +290,48 @@ def get_active_views(user_id: int):
     """Get list of cities currently being viewed by user"""
     active_cities = get_active_city_views(user_id)
     return {"active_cities": active_cities}
+
+# City rating endpoints
+@app.post("/rate_city", response_model=models.CityRatingResponse)
+def rate_city(rating_data: models.CityRating):
+    """Rate a city (1-5 stars)"""
+    result = update_city_rating(rating_data.user_id, rating_data.city_name, rating_data.rating)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.CityRatingResponse(**result)
+
+
+@app.get("/city_rating/{user_id}/{city_name}")
+def get_city_rating_endpoint(user_id: int, city_name: str):
+    """Get current rating for a specific city"""
+    result = get_city_rating(user_id, city_name)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result["data"]
+
+
+@app.get("/user_city_ratings/{user_id}")
+def get_user_city_ratings_endpoint(user_id: int):
+    """Get all city ratings for a user"""
+    result = get_user_city_ratings(user_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result["data"]
+
+# Ready cities endpoints
+@app.post("/ready_cities", response_model=models.ReadyCityResponse)
+def add_city_endpoint(city_data: models.ReadyCity):
+    """Add a new city to ready_cities table"""
+    result = add_ready_city(city_data)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.ReadyCityResponse(**result)
+
+
+@app.get("/ready_cities/{city_id}")
+def get_city_endpoint(city_id: int):
+    """Get city by ID"""
+    result = get_ready_city(city_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result["data"]

@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-DB_PATH = "../../tours.db"
+DB_PATH = "../tours.db"
 
 def get_connection():
     """Create and return a database connection"""
@@ -72,8 +72,7 @@ def init_db():
     # Create user surveys table (NEW STRUCTURE)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_surveys (
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER UNIQUE,
+        user_id INTEGER PRIMARY KEY,
         gender TEXT,
         age_group TEXT,
         cities_5 TEXT,
@@ -107,6 +106,21 @@ def init_db():
         paroj BOOLEAN,
         kuhnya BOOLEAN,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Create ready_cities table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS ready_cities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        city TEXT NOT NULL,
+        federal_district TEXT,
+        region TEXT,
+        fias_level INTEGER,
+        capital_marker INTEGER,
+        population INTEGER,
+        foundation_year INTEGER,
+        features TEXT
     )
     ''')
     
