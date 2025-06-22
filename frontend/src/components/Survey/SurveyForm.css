@@ -1,0 +1,88 @@
+body {
+  margin: 0;
+  font-family: "Montserrat", sans-serif;
+  font-optical-sizing: auto;
+  font-style: normal;
+  width: 100vw;
+}
+
+
+.survey-form {
+    width: 512px;
+    margin: 30px auto;
+    padding: 20px;
+}
+
+
+.survey-form h2 {
+    font-weight: 500;
+    font-size: 40px;
+    letter-spacing: -0.9px;
+    margin: 0;
+    margin-bottom: 20px;
+}
+
+.survey-form h4 {
+    font-weight: 500;
+    font-size: 16px;
+    margin: 0;
+    margin-bottom: 10px;
+    color: #1C1B1F
+}
+.survey-form p {
+    font-weight: 400;
+    font-size: 16px;
+    margin: 0;
+    margin-bottom: 10px;
+    color: #112211;
+    opacity: 0.75;
+
+}
+
+.submit-btn {
+    background-color: #5DC1B0;
+    margin-top: 10px;
+    width: 512px;
+    height: 48px;
+    border-radius: 4px;
+    padding: 8px 16px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #112211;
+    cursor: pointer;
+    border: none;
+    transition: background-color 0.3s;
+
+}
+
+.submit-btn:hover {
+  background-color: #59b7a8;
+}
+
+.options-container {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+}
+
+.question-block{
+    padding: 11px;
+}
+
+
+.option-item {
+  display: flex;
+  align-items: center;
+}
+
+.option-input {
+  margin-right: 7px;
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  color: #79747E;
+}
+
+.option-label {
+  font-size: 16px;
+}
