@@ -5,14 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="f05a9495-5448-4a3a-ad99-2263548aac7c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/seed_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/seed_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tours.db" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/TravelAI.iml" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/database/database.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/main.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/main.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/operations/user_operations.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/operations/user_operations.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/app/schemas/models.py" beforeDir="false" afterPath="$PROJECT_DIR$/backend/app/schemas/models.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -51,11 +49,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\backend" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\operations" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\main" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\database" />
-      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\operations" />
     </key>
   </component>
   <component name="SharedIndexes">

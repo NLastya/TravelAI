@@ -10,6 +10,7 @@ from operations.user_operations import save_user_interests, save_user_survey, ge
 from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
 from operations.recommendations import get_recommended_tours, get_fallback_recommendations
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
+from operations.analytics_operations import start_city_view, end_city_view, get_user_city_analytics, get_active_city_views
 from parsing import parser
 import requests
 import os
@@ -254,3 +255,37 @@ def test_redis():
         return {"status": "success", "value": value}
     except Exception as e:
         return {"status": "error", "message": str(e)}
+
+# Analytics endpoints
+@app.post("/analytics/city-view/start", response_model=models.CityViewResponse)
+def start_city_view_tracking(event: models.CityViewEvent):
+    """Start tracking city view time"""
+    result = start_city_view(event.user_id, event.city_name)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.CityViewResponse(**result)
+
+
+@app.post("/analytics/city-view/end", response_model=models.CityViewResponse)
+def end_city_view_tracking(event: models.CityViewEvent):
+    """End tracking city view time and update analytics"""
+    result = end_city_view(event.user_id, event.city_name)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.CityViewResponse(**result)
+
+
+@app.get("/analytics/city-view/{user_id}")
+def get_city_analytics(user_id: int):
+    """Get user's city view analytics"""
+    result = get_user_city_analytics(user_id)
+    if result["status"] == "error":
+        raise HTTPException(status_code=404, detail=result["message"])
+    return result["data"]
+
+
+@app.get("/analytics/city-view/{user_id}/active")
+def get_active_views(user_id: int):
+    """Get list of cities currently being viewed by user"""
+    active_cities = get_active_city_views(user_id)
+    return {"active_cities": active_cities}
