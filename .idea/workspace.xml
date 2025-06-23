@@ -4,16 +4,7 @@
     <option name="autoReloadType" value="SELECTIVE" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="f05a9495-5448-4a3a-ad99-2263548aac7c" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/backend/.gitignore" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/Dockerfile" beforeDir="false" afterPath="$PROJECT_DIR$/backend/Dockerfile" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/README.md" beforeDir="false" afterPath="$PROJECT_DIR$/backend/README.md" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/database.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/database.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/app/database/seed_data.py" beforeDir="false" afterPath="$PROJECT_DIR$/app/database/seed_data.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/backend/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/tours.db" beforeDir="false" />
-    </list>
+    <list default="true" id="f05a9495-5448-4a3a-ad99-2263548aac7c" name="Changes" comment="" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -51,11 +42,11 @@
 }</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
+      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI" />
+      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\backend" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\operations" />
       <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\main" />
-      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\app\database" />
-      <recent name="C:\Users\cleve\OneDrive\Документы\GitHub\TravelAI\operations" />
     </key>
   </component>
   <component name="SharedIndexes">

@@ -81,14 +81,21 @@ class UserSurvey(BaseModel):
     user_id: int
     gender: str
     age_group: str
-    liked_cities: str
-    disliked_cities: str
+    cities_5: Optional[str] = None
+    cities_4: Optional[str] = None
+    cities_3: Optional[str] = None
+    cities_2: Optional[str] = None
+    cities_1: Optional[str] = None
+    izbrannoe: Optional[str] = None
+    cities_prosmotr_more: Optional[str] = None
+    cities_prosmotr_less: Optional[str] = None
     poznavatelnyj_kulturno_razvlekatelnyj: bool
     delovoy: bool
     etnicheskiy: bool
     religioznyj: bool
     sportivnyj: bool
     obrazovatelnyj: bool
+    ekzotic: bool
     ekologicheskiy: bool
     selskij: bool
     lechebno_ozdorovitelnyj: bool
@@ -103,6 +110,7 @@ class UserSurvey(BaseModel):
     s_semej: bool
     v_odinochku: bool
     paroj: bool
+    kuhnya: bool
 
 
 class SurveyResponse(BaseModel):
@@ -113,3 +121,44 @@ class SurveyResponse(BaseModel):
 class FavoriteRequest(BaseModel):
     user_id: int
     tour_id: int
+
+
+class CityViewEvent(BaseModel):
+    user_id: int
+    city_name: str
+    timestamp: str  # ISO format timestamp
+    action: str  # "start" or "end"
+
+
+class CityViewResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+
+
+class CityRating(BaseModel):
+    user_id: int
+    city_name: str
+    rating: int  # 1-5 звезд
+
+
+class CityRatingResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+
+
+class ReadyCity(BaseModel):
+    id: Optional[int] = None
+    city: str
+    federal_district: Optional[str] = None
+    region: Optional[str] = None
+    fias_level: Optional[int] = None
+    capital_marker: Optional[int] = None
+    population: Optional[int] = None
+    foundation_year: Optional[int] = None
+    features: Optional[str] = None
+
+
+class ReadyCityResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+    data: Optional[ReadyCity] = None

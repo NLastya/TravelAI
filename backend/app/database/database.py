@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 load_dotenv()
-DB_PATH = "../../tours.db"
+DB_PATH = "../tours.db"
 
 def get_connection():
     """Create and return a database connection"""
@@ -72,18 +72,24 @@ def init_db():
     # Create user surveys table (NEW STRUCTURE)
     cursor.execute('''
     CREATE TABLE IF NOT EXISTS user_surveys (
-        id INTEGER PRIMARY KEY,
-        user_id INTEGER UNIQUE,
+        user_id INTEGER PRIMARY KEY,
         gender TEXT,
         age_group TEXT,
-        liked_cities TEXT,
-        disliked_cities TEXT,
+        cities_5 TEXT,
+        cities_4 TEXT,
+        cities_3 TEXT,
+        cities_2 TEXT,
+        cities_1 TEXT,
+        izbrannoe TEXT,
+        cities_prosmotr_more TEXT,
+        cities_prosmotr_less TEXT,
         poznavatelnyj_kulturno_razvlekatelnyj BOOLEAN,
         delovoy BOOLEAN,
         etnicheskiy BOOLEAN,
         religioznyj BOOLEAN,
         sportivnyj BOOLEAN,
         obrazovatelnyj BOOLEAN,
+        ekzotic BOOLEAN,
         ekologicheskiy BOOLEAN,
         selskij BOOLEAN,
         lechebno_ozdorovitelnyj BOOLEAN,
@@ -98,7 +104,23 @@ def init_db():
         s_semej BOOLEAN,
         v_odinochku BOOLEAN,
         paroj BOOLEAN,
+        kuhnya BOOLEAN,
         FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Create ready_cities table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS ready_cities (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        city TEXT NOT NULL,
+        federal_district TEXT,
+        region TEXT,
+        fias_level INTEGER,
+        capital_marker INTEGER,
+        population INTEGER,
+        foundation_year INTEGER,
+        features TEXT
     )
     ''')
     
