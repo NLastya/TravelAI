@@ -1,4 +1,4 @@
-from playwright.sync_api import sync_playwright
+"""from playwright.sync_api import sync_playwright
 from bs4 import BeautifulSoup
 
 
@@ -59,4 +59,4 @@ if __name__ == "__main__":
 
     # Выводим текст для каждого сайта
     for i, text in enumerate(texts):
-        print(f"\nТекст с сайта {i + 1}:\n{text[:500]}...")
+        print(f"\nТекст с сайта {i + 1}:\n{text[:500]}...")"""

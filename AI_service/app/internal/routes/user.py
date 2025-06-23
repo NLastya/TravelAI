@@ -2,21 +2,17 @@ from fastapi import APIRouter, UploadFile, File, Form, Request, Response
 from fastapi.responses import JSONResponse
 from fastapi.responses import FileResponse
 import asyncio
-import app.internal.ml.rag_fusion as rag
 import app.internal.ml.model as llm
 import app.internal.parsing.parser_selenium as parser
 from pydantic import BaseModel
 from dotenv import load_dotenv
 from dataclasses import dataclass
-from sentence_transformers import SentenceTransformer, util
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification
-from transformers import pipeline
+from typing import Optional, List, Dict, Any
 import numpy as np
-import boto3
 import os
-import io
-import json
-import time
+import sqlite3
+from app.internal.parsing.overpass import fetch_places_to_sqlite, translit_name
+from datetime import datetime
 
 router = APIRouter(
     prefix="/api/v1"
@@ -31,11 +27,6 @@ S3_SECRET_KEY = os.getenv('S3_SECRET_KEY')
 S3_URI = os.getenv('S3_HOST')
 S3_PORT = os.getenv('S3_PORT')
 
-model_search = SentenceTransformer('sentence-transformers/multi-qa-mpnet-base-dot-v1')
-
-tokenizer = AutoTokenizer.from_pretrained("Babelscape/wikineural-multilingual-ner")
-model = AutoModelForTokenClassification.from_pretrained("Babelscape/wikineural-multilingual-ner")
-nlp = pipeline("ner", model=model, tokenizer=tokenizer, grouped_entities=True)
 
 
 @dataclass
@@ -46,87 +37,139 @@ class Generate(BaseModel):
     file_names: list
 
 
-@dataclass
-class Search_Location(BaseModel):
+class GenerateTourRequest(BaseModel):
+    user_id: int
+    data_start: str
+    data_end: str
     location: str
-    weather: list
+    weather: list = None
+    hobby: List[str]
 
 
-def load_data(file_names: list, bucket_name: str, query: str) -> list:
-    arr_data = []
+class Places(BaseModel):
+    id_place: int
+    name: str
+    location: str
+    rating: str
+    date: str
+    description: str = None,
+    photo: str
+    mapgeo: list
 
-    for file in file_names:
-        # print(S3_URI, S3_ACCESS_KEY, S3_SECRET_KEY)
-        # Настройка клиента S3
-        s3 = boto3.client(
-            service_name="s3",
-            endpoint_url=str(S3_URI),  # Замените на ваш endpoint
-            aws_access_key_id=str(S3_ACCESS_KEY),  # Замените на ваш Access Key
-            aws_secret_access_key=str(S3_SECRET_KEY),  # Замените на ваш Secret Key
-            # region_name='us-east-1'  # Замените на ваш регион, если необходимо
+class Tour(BaseModel):
+    tour_id: int
+    title: str
+    date: List[str] 
+    location: str
+    rating: float
+    relevance: float
+    places: Optional[Places] = None
+
+
+@router.post("/search_location", response_model=List[Tour])
+def generate(data: GenerateTourRequest):
+    city = data.location
+    weather_filters = data.weather or []
+    hobbies = [h.lower() for h in data.hobby]
+    db_name = "places.db"
+    table_name = f"places_{translit_name(city)}"
+
+    # Загружаем данные если таблица не существует
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
+    if not cur.fetchone():
+        fetch_places_to_sqlite(city, db_name=db_name)
+    conn.close()
+
+    # Получаем данные
+    conn = sqlite3.connect(db_name)
+    cur = conn.cursor()
+    cur.execute(f'SELECT id, name, category, rating, opening_hours, latitude, longitude FROM "{table_name}"')
+    rows = cur.fetchall()
+    conn.close()
+
+    # --- Фильтрация по погоде и хобби ---
+
+    def match_weather(place_cat: str) -> bool:
+        weather_map = {
+            'Ресторан': ['rain', 'snow'],
+            'Музей': ['rain', 'snow'],
+            'Историческое место': ['sun'],
+            'Парк': ['sun'],
+            'Достопримечательность': ['sun', 'snow']
+        }
+        allowed = weather_map.get(place_cat, ['sun', 'rain', 'snow'])
+        return not weather_filters or any(w in allowed for w in weather_filters)
+
+    def match_hobby(place_cat: str) -> bool:
+        hobby_map = {
+            'Ресторан': ['еда', 'кухня'],
+            'Музей': ['искусство', 'история'],
+            'Историческое место': ['история', 'архитектура'],
+            'Парк': ['природа', 'отдых'],
+            'Достопримечательность': ['фото', 'туризм']
+        }
+        tags = hobby_map.get(place_cat, [])
+        return any(h in tags for h in hobbies)
+
+    def calculate_avg_rating(places: List[Places]) -> float:
+        ratings = []
+        for p in places:
+            try:
+                ratings.append(float(p.rating))
+            except (ValueError, TypeError):
+                continue
+        return round(sum(ratings) / len(ratings), 2) if ratings else 4.0
+
+    # --- Фильтрация всех подходящих мест ---
+    today = datetime.now().date().isoformat()
+    filtered_places = []
+
+    for (id_, name, category, rating, hours, lat, lon) in rows:
+        if not match_weather(category):
+            continue
+        if not match_hobby(category):
+            continue
+
+        place = Places(
+            id_place=id_,
+            name=name,
+            location=city,
+            rating=rating,
+            date=today,
+            description=category,
+            photo="https://via.placeholder.com/150",
+            mapgeo=[lat, lon]
         )
+        filtered_places.append(place)
 
-        # Кладём что-то в бакет
-        # response = s3.get_object(Bucket=bucket_name,
-        #                          Key=file[0])  # Замените 'your_bucket_name' на имя вашего бакета
-        # file_content = response['Body'].read()
-        #
-        # array = np.frombuffer(file_content, dtype=np.float32)
-        # np.save("emb_temp.npy", array[:768])
-        # response2 = s3.get_object(Bucket=bucket_name,
-        #                           Key=file[1])  # Замените 'your_bucket_name' на имя вашего бакета
-        # file_content2 = response2['Body'].read()
-        # print(file_content2)
+    # --- Разбиение по дням ---
+    start_date = datetime.strptime(data.data_start, "%Y-%m-%d")
+    end_date = datetime.strptime(data.data_end, "%Y-%m-%d")
+    total_days = (end_date - start_date).days + 1
+    places_per_day = 4
+    tours = []
+    tour_id = 0
 
-        s3.download_file(bucket_name, file[0], f"emb_temp_{file[1]}.npy")
-        s3.download_file(bucket_name, file[1], f"emb_temp{file[0]}.txt")
+    for day_index in range(total_days):
+        tour_date = (start_date + timedelta(days=day_index)).strftime("%Y-%m-%d")
+        daily_places = filtered_places[day_index * places_per_day:(day_index + 1) * places_per_day]
 
-        time.sleep(2)
+        if not daily_places:
+            continue
 
-        arr_data += rag.Rag_fusion(docs=open(f"emb_temp{file[0]}.txt", "r", encoding="utf-8"),
-                                   doc_emb=np.load(open(f"emb_temp_{file[1]}.npy", "rb"))).score_docs(query=query,
-                                                                                                      model_search=model_search)
+        tour = Tour(
+            tour_id=tour_id,
+            title=f"Тур по {city} — день {day_index + 1}",
+            date=[tour_date],
+            location=city,
+            rating=calculate_avg_rating(daily_places),
+            relevance=1.0,
+            places=daily_places
+        )
+        tours.append(tour)
+        tour_id += 1
 
-    return arr_data
+    return tours
 
-
-@router.post("/generate")
-async def generate(data: Generate):
-    arr_data = load_data(file_names=data.file_names, bucket_name=data.bucket_name, query=data.query)
-
-    if data.model_type == "mistral":
-        return {
-            "message": await rag.Rag_fusion(query=data.query).generate_with_arr(model=llm.Model_API(api_key).generate,
-                                                                                arr_data=arr_data)}
-    elif data.model_type == "llama3-8B":
-        return {
-            "message": await rag.Rag_fusion(query=data.query).generate_with_arr(model=llm.ollama, arr_data=arr_data)}
-    elif data.model_type == "llama3-70B":
-        return {"message": await rag.Rag_fusion(query=data.query).generate_with_arr(
-            model=llm.Model_llama_70B(api_key=api_key_openai).generate, arr_data=arr_data)}
-    else:
-        return {"message": await rag.example(model_search, data.query, api_key)}
-
-
-@router.post("/search_location")
-def generate(data: Search_Location):
-    print(data.location)
-    arr_search = parser.get_text(f"Места {data.location}")
-
-    # print(arr_search)
-    arr_loc = []
-    for text in arr_search:
-        for loc in nlp(text):
-            if loc["entity_group"] == "LOC" and loc["word"] != data.location:
-                arr_loc.append(loc["word"])
-
-    print(arr_loc)
-    # print(f"Место для которого мы составляем рассписание: {data.location}.\n Нам известна погода по дням: {"".join([f"{i[0]} - {i[1]},\n" for i in data.weather])}.\n Места которые есть в этом городе: {"".join([f"{i},\n" for i in arr_loc])}\n Выбери лучшее место под погоду, в дождливое время закрытое помещение(музеи) в солнечную более открытое(парки, памятники).\nВыведи только в подобном формате: 01.01-Парк\n02.01-музей\n. Для каждого дня напиши минимум РАЗНЫЕ 3 места")
-
-    answer = llm.Model_API(api_key).generate(
-        f"Места которые есть в этом городе: {"".join([f"{i},\n" for i in arr_loc])}\n Классифицируй каждое место в открытое(парки, площади) или закрытое(музей, галерея) .\nВыведи только в подобном формате: Парк_открытое\nмузей_закрытое\n.")
-    answer = [arr.split("_") for arr in answer.split('\n')]
-
-    get_trip = llm.Model_API(api_key).generate(f"Место для которого мы составляем рассписание: {data.location}.\n Нам известна погода по дням: {"".join([f"{i[0]} - {i[1]},\n" for i in data.weather])}.\n Места которые есть и их открытость(в помещении или нет) в этом городе: {"".join([f"{i},\n" for i in answer])}\n Выбери лучшее место под погоду, в дождливое время закрытое помещение(музеи) в солнечную более открытое(парки, памятники).\nВыведи только в подобном формате: 01.01-Парк\n01.01-Сквер\n02.01-музей\n. Для каждого дня напиши минимум РАЗНЫЕ 5 или более мест")
-
-    return {"data": get_trip}

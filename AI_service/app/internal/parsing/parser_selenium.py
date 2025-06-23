@@ -8,6 +8,9 @@ from webdriver_manager.chrome import ChromeDriverManager
 from bs4 import BeautifulSoup
 import time
 
+
+
+
 def get_links_from_google(query, driver):
     driver.get(f'https://www.duckduckgo.com/?q={query}')
 
@@ -56,6 +59,10 @@ def get_text(query) -> list:
 
     driver.quit()
     return texts
+
+
+
+
 
 if __name__ == "__main__":
     query = "Куда сходить погулять в Москве"

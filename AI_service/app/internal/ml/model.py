@@ -1,4 +1,4 @@
-from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification
+"""from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification
 from transformers import pipeline
 from mistralai import Mistral
 from ollama import chat
@@ -121,3 +121,4 @@ class Model_llama_70B2:
 
 if __name__ == '__main__':
     print(Model_llama_70B2("18kBsYH2IFrKDsA6sAgNRO4TotwkDa4j").generate("Питание"))
+"""
