@@ -6,6 +6,7 @@
     position: relative;
     margin-bottom: 80px;
     margin-top: calc(70px + 20px);
+    min-height: calc(85vh - 70px);
 }
 
 .personalStyle {

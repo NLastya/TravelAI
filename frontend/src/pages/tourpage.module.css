@@ -3,11 +3,12 @@ h3, p {
 }
 
 .main {
-    margin-top: 10px;
+    margin-top: 70px;
     padding: 40px 87px 10px;
     width: 100vw;
     box-sizing: border-box;
     min-width: 800px;
+    min-height: calc(85vh - 70px);
 }
 
 .card {
