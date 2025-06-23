@@ -197,9 +197,9 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
 
 # User preferences endpoints
 @app.post("/user_interests/{user_id}")
-def save_interests(user_id: int, interests: List[str]):
+def save_interests(user_id: int, request: models.UserInterestsRequest):
     """Save user interests"""
-    result = save_user_interests(user_id, interests)
+    result = save_user_interests(user_id, request.interests)
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
     return result
@@ -212,7 +212,7 @@ def save_survey(survey: models.UserSurvey):
         raise HTTPException(status_code=500, detail=result["message"])
     return models.SurveyResponse(**result)
 
-@app.get("/user_survey/{user_id}")
+@app.get("/user_survey/{user_id}", response_model=models.UserSurvey)
 def get_survey(user_id: int):
     """Get user survey data"""
     cache_key = f"user_survey:{user_id}"
@@ -276,7 +276,7 @@ def end_city_view_tracking(event: models.CityViewEvent):
     return models.CityViewResponse(**result)
 
 
-@app.get("/analytics/city-view/{user_id}")
+@app.get("/analytics/city-view/{user_id}", response_model=models.CityAnalyticsResponse)
 def get_city_analytics(user_id: int):
     """Get user's city view analytics"""
     result = get_user_city_analytics(user_id)
@@ -285,7 +285,7 @@ def get_city_analytics(user_id: int):
     return result["data"]
 
 
-@app.get("/analytics/city-view/{user_id}/active")
+@app.get("/analytics/city-view/{user_id}/active", response_model=models.ActiveViewsResponse)
 def get_active_views(user_id: int):
     """Get list of cities currently being viewed by user"""
     active_cities = get_active_city_views(user_id)
@@ -301,7 +301,7 @@ def rate_city(rating_data: models.CityRating):
     return models.CityRatingResponse(**result)
 
 
-@app.get("/city_rating/{user_id}/{city_name}")
+@app.get("/city_rating/{user_id}/{city_name}", response_model=models.CityRatingData)
 def get_city_rating_endpoint(user_id: int, city_name: str):
     """Get current rating for a specific city"""
     result = get_city_rating(user_id, city_name)
@@ -309,8 +309,7 @@ def get_city_rating_endpoint(user_id: int, city_name: str):
         raise HTTPException(status_code=404, detail=result["message"])
     return result["data"]
 
-
-@app.get("/user_city_ratings/{user_id}")
+@app.get("/user_city_ratings/{user_id}", response_model=models.UserCityRatingsResponse)
 def get_user_city_ratings_endpoint(user_id: int):
     """Get all city ratings for a user"""
     result = get_user_city_ratings(user_id)
