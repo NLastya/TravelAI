@@ -37,8 +37,9 @@ def get_tour_categories(tour_id: int) -> List[str]:
     cursor = conn.cursor()
     
     try:
-        cursor.execute("SELECT category FROM tour_categories WHERE tour_id = ?", (tour_id,))
-        return [row[0] for row in cursor.fetchall()]
+        # cursor.execute("SELECT category FROM tour_categories WHERE tour_id = ?", (tour_id,))
+        # return [row[0] for row in cursor.fetchall()]
+        return []
     finally:
         conn.close()
 
@@ -118,21 +119,18 @@ def get_tour_by_id(tour_id: int):
         ''', (tour_id,))
         
         places = []
-
-        arr = cursor.fetchall()
-        print(arr)
-
-        for place_row in arr:
-            places.append(models.Place(
-                name=place_row[0],
-                location=place_row[1],
-                rating=place_row[2],
-                date_start=place_row[3],
-                date_end=place_row[4],
-                description=place_row[5],
-                photo=place_row[6],
-                mapgeo_x=place_row[7],
-                mapgeo_y=place_row[8]
+        
+        for place_row in cursor.fetchall():
+            place_row = [0] + list(place_row)
+            places.append(models.Places(
+                id_place=place_row[0],
+                name=place_row[1],
+                location=place_row[2],
+                rating=place_row[3],
+                date=f"{place_row[4]} - {place_row[5]}" if place_row[4] and place_row[5] else str(place_row[4] or place_row[5]),
+                description=place_row[6],
+                photo=place_row[7],
+                mapgeo=[place_row[8], place_row[9]]
             ))
         
         # Get categories
@@ -141,8 +139,7 @@ def get_tour_by_id(tour_id: int):
         return models.Tour(
             tour_id=tour_id,
             title=tour_row[0],
-            date_start=tour_row[1],
-            date_end=tour_row[2],
+            date=[tour_row[1], tour_row[2]],
             location=tour_row[3],
             rating=tour_row[4],
             relevance=tour_row[5],

@@ -291,8 +291,8 @@ def get_active_views(user_id: int):
     return {"active_cities": active_cities}
 
 # City rating endpoints
-@app.post("/rate_city", response_model=models.RegisterResponse)
-def rate_city(rating_data: models.RegisterResponse):
+@app.post("/rate_city", response_model=models.CityRatingResponse)
+def rate_city(rating_data: models.CityRating):
     """Rate a city (1-5 stars)"""
     result = update_city_rating(rating_data.user_id, rating_data.city_name, rating_data.rating)
     if result["status"] == "error":
@@ -317,8 +317,8 @@ def get_user_city_ratings_endpoint(user_id: int):
     return result["data"]
 
 # Ready cities endpoints
-@app.post("/ready_cities", response_model=models.RegisterResponse)
-def add_city_endpoint(city_data: models.RegisterResponse):
+@app.post("/ready_cities", response_model=models.ReadyCityResponse)
+def add_city_endpoint(city_data: models.ReadyCity):
     """Add a new city to ready_cities table"""
     result = add_ready_city(city_data)
     if result["status"] == "error":
