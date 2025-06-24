@@ -42,24 +42,23 @@ async def startup_event():
 @app.post("/generate_tour", response_model=List[models.Tour])
 def generate_tour(request: models.GenerateTourRequest):
     """Generate tours based on user request"""
-    try:
-        # Call external API for tour generation
-        response = requests.post(API_URL, json=request.dict())
-        if response.status_code != 200:
-            raise HTTPException(status_code=500, detail="Failed to generate tours")
+
+    response = requests.post(API_URL, json=request.dict())
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to generate tours")
         
         # Parse and save tours
-        tours_data = response.json()
-        generated_tours = []
-        for tour_data in tours_data:
-            tour = models.Tour(**tour_data)
-            tour_id = save_tour_to_db(tour)
-            tour.tour_id = tour_id
-            generated_tours.append(tour)
+    tours_data = response.json()
+    print(tours_data)
+    generated_tours = []
+    for tour_data in tours_data:
+        tour = models.Tour(**tour_data)
+        tour_id = save_tour_to_db(tour)
+        tour.tour_id = tour_id
+        generated_tours.append(tour)
         
-        return generated_tours
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return generated_tours
+
 
 @app.post("/generate_url_tour", response_model=List[models.Tour])
 def generate_url_tour(request: models.GenerateUrlTourRequest):
@@ -258,8 +257,8 @@ def test_redis():
         return {"status": "error", "message": str(e)}
 
 # Analytics endpoints
-@app.post("/analytics/city-view/start", response_model=models.CityViewResponse)
-def start_city_view_tracking(event: models.CityViewEvent):
+@app.post("/analytics/city-view/start", response_model=models.RegisterResponse)
+def start_city_view_tracking(event: models.RegisterResponse):
     """Start tracking city view time"""
     result = start_city_view(event.user_id, event.city_name)
     if result["status"] == "error":
@@ -267,8 +266,8 @@ def start_city_view_tracking(event: models.CityViewEvent):
     return models.CityViewResponse(**result)
 
 
-@app.post("/analytics/city-view/end", response_model=models.CityViewResponse)
-def end_city_view_tracking(event: models.CityViewEvent):
+@app.post("/analytics/city-view/end", response_model=models.RegisterResponse)
+def end_city_view_tracking(event: models.RegisterResponse):
     """End tracking city view time and update analytics"""
     result = end_city_view(event.user_id, event.city_name)
     if result["status"] == "error":
@@ -292,13 +291,13 @@ def get_active_views(user_id: int):
     return {"active_cities": active_cities}
 
 # City rating endpoints
-@app.post("/rate_city", response_model=models.CityRatingResponse)
-def rate_city(rating_data: models.CityRating):
+@app.post("/rate_city", response_model=models.RegisterResponse)
+def rate_city(rating_data: models.RegisterResponse):
     """Rate a city (1-5 stars)"""
     result = update_city_rating(rating_data.user_id, rating_data.city_name, rating_data.rating)
     if result["status"] == "error":
         raise HTTPException(status_code=400, detail=result["message"])
-    return models.CityRatingResponse(**result)
+    return models.RegisterResponse(**result)
 
 
 @app.get("/city_rating/{user_id}/{city_name}")
@@ -319,8 +318,8 @@ def get_user_city_ratings_endpoint(user_id: int):
     return result["data"]
 
 # Ready cities endpoints
-@app.post("/ready_cities", response_model=models.ReadyCityResponse)
-def add_city_endpoint(city_data: models.ReadyCity):
+@app.post("/ready_cities", response_model=models.RegisterResponse)
+def add_city_endpoint(city_data: models.RegisterResponse):
     """Add a new city to ready_cities table"""
     result = add_ready_city(city_data)
     if result["status"] == "error":

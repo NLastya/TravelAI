@@ -54,8 +54,8 @@ def save_tour_to_db(tour_data, url=None):
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (
             tour_data.title,
-            tour_data.date_start,
-            tour_data.date_end,
+            "21.01",
+            "22.01",
             tour_data.location,
             tour_data.rating,
             tour_data.relevance,
@@ -75,17 +75,15 @@ def save_tour_to_db(tour_data, url=None):
                 place.name,
                 place.location,
                 place.rating,
-                place.date_start,
-                place.date_end,
+                "21.01",
+                "22.01",
                 place.description,
                 place.photo,
-                place.mapgeo_x,
-                place.mapgeo_y
+                place.mapgeo[0],
+                place.mapgeo[1]
             ))
         
-        # Save categories
-        if tour_data.categories:
-            save_tour_categories(tour_id, tour_data.categories)
+        
         
         conn.commit()
         return tour_id
@@ -120,7 +118,11 @@ def get_tour_by_id(tour_id: int):
         ''', (tour_id,))
         
         places = []
-        for place_row in cursor.fetchall():
+
+        arr = cursor.fetchall()
+        print(arr)
+
+        for place_row in arr:
             places.append(models.Place(
                 name=place_row[0],
                 location=place_row[1],

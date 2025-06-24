@@ -1,17 +1,21 @@
 from pydantic import BaseModel
 from typing import Optional, List, Dict, Any
 
-# Модели данных
 class Place(BaseModel):
-    id_place: int
     name: str
     location: str
     rating: float
-    date_start: str
-    date_end: str
-    description: Optional[str] = None
-    photo: Optional[str] = None
-    mapgeo: List[float]  # [latitude, longitude]
+    date_start: str  # или используйте datetime.date, если нужно
+    date_end: str    # или используйте datetime.date, если нужно
+    description: str
+    photo: str
+    mapgeo_x: float
+    mapgeo_y: float
+    
+    # Опционально: свойство для удобного доступа к координатам как списку
+    @property
+    def mapgeo(self) -> list[float]:
+        return [self.mapgeo_x, self.mapgeo_y]
 
 
 class Places(BaseModel):
@@ -31,8 +35,7 @@ class Tour(BaseModel):
     location: str
     rating: float
     relevance: float
-    places: Optional[Places] = None
-
+    places: List[Places] = None
 
 class GenerateTourRequest(BaseModel):
     user_id: int

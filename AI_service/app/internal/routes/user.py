@@ -12,7 +12,7 @@ import numpy as np
 import os
 import sqlite3
 from app.internal.parsing.overpass import fetch_places_to_sqlite, translit_name
-from datetime import datetime
+from datetime import datetime, timedelta
 
 router = APIRouter(
     prefix="/api/v1"
@@ -63,11 +63,65 @@ class Tour(BaseModel):
     location: str
     rating: float
     relevance: float
-    places: Optional[Places] = None
+    places: List[Places] = None
 
 
 @router.post("/search_location", response_model=List[Tour])
 def generate(data: GenerateTourRequest):
+    import sqlite3
+
+    def print_entire_database(db_name="places.db"):
+        conn = sqlite3.connect(db_name)
+        cur = conn.cursor()
+        
+        # Получаем список всех таблиц
+        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
+        tables = cur.fetchall()
+        
+        print(f"\nСодержимое базы данных '{db_name}':")
+        print("=" * 50)
+        
+        for table in tables:
+            table_name = table[0]
+            print(f"\nТаблица: {table_name}")
+            print("-" * 40)
+            
+            # Получаем структуру таблицы
+            cur.execute(f"PRAGMA table_info({table_name})")
+            columns = cur.fetchall()
+            column_names = [col[1] for col in columns]
+            print("Структура:", ", ".join(column_names))
+            
+            # Получаем содержимое таблицы
+            try:
+                cur.execute(f"SELECT * FROM {table_name}")
+                rows = cur.fetchall()
+                
+                if not rows:
+                    print("Таблица пуста")
+                    continue
+                    
+                # Выводим первые 5 строк (или все, если их меньше)
+                max_rows_to_show = min(5, len(rows))
+                print(f"Первые {max_rows_to_show} записей:")
+                
+                for i, row in enumerate(rows[:max_rows_to_show], 1):
+                    print(f"{i}. {row}")
+                    
+                if len(rows) > max_rows_to_show:
+                    print(f"... и еще {len(rows) - max_rows_to_show} записей")
+                    
+            except sqlite3.Error as e:
+                print(f"Ошибка при чтении таблицы {table_name}: {e}")
+        
+        conn.close()
+        print("\n" + "=" * 50 + "\n")
+
+    # Пример использования
+    print_entire_database()
+
+    print(data)
+
     city = data.location
     weather_filters = data.weather or []
     hobbies = [h.lower() for h in data.hobby]
@@ -79,14 +133,19 @@ def generate(data: GenerateTourRequest):
     cur = conn.cursor()
     cur.execute("SELECT name FROM sqlite_master WHERE type='table' AND name=?", (table_name,))
     if not cur.fetchone():
+        conn.close()  # Закрываем соединение перед вызовом fetch_places_to_sqlite
         fetch_places_to_sqlite(city, db_name=db_name)
-    conn.close()
-
+        conn = sqlite3.connect(db_name)  # Открываем новое соединение
+    
     # Получаем данные
-    conn = sqlite3.connect(db_name)
     cur = conn.cursor()
-    cur.execute(f'SELECT id, name, category, rating, opening_hours, latitude, longitude FROM "{table_name}"')
+    cur.execute(f"""
+        SELECT id, name, category, rating, opening_hours, latitude, longitude 
+        FROM "{table_name}"
+    """)
+
     rows = cur.fetchall()
+    print(rows)
     conn.close()
 
     # --- Фильтрация по погоде и хобби ---
@@ -127,10 +186,10 @@ def generate(data: GenerateTourRequest):
     filtered_places = []
 
     for (id_, name, category, rating, hours, lat, lon) in rows:
-        if not match_weather(category):
+        '''if not match_weather(category):
             continue
         if not match_hobby(category):
-            continue
+            continue'''
 
         place = Places(
             id_place=id_,
@@ -145,14 +204,14 @@ def generate(data: GenerateTourRequest):
         filtered_places.append(place)
 
     # --- Разбиение по дням ---
-    start_date = datetime.strptime(data.data_start, "%Y-%m-%d")
-    end_date = datetime.strptime(data.data_end, "%Y-%m-%d")
+    start_date = datetime.strptime(data.data_start, "%d.%m.%y")
+    end_date = datetime.strptime(data.data_end, "%d.%m.%y")
     total_days = (end_date - start_date).days + 1
     places_per_day = 4
     tours = []
     tour_id = 0
 
-    for day_index in range(total_days):
+    for day_index in range(total_days):  # Используем total_days вместо фиксированного 5
         tour_date = (start_date + timedelta(days=day_index)).strftime("%Y-%m-%d")
         daily_places = filtered_places[day_index * places_per_day:(day_index + 1) * places_per_day]
 
@@ -171,5 +230,8 @@ def generate(data: GenerateTourRequest):
         tours.append(tour)
         tour_id += 1
 
+    print(tours)
+
     return tours
+
 
