@@ -79,10 +79,12 @@ def fetch_places_to_sqlite(city_name: str, db_name: str = "places.db"):
 
         # координаты
         if isinstance(element, overpy.Node):
-            lat = element.lat
-            lon = element.lon
+            lat = float(element.lat)  # Convert to float
+            lon = float(element.lon)  # Convert to float
         else:
             lat, lon = get_centroid_latlon(element)
+            lat = float(lat) if lat != "" else 0.0 # Convert to float
+            lon = float(lon) if lon != "" else 0.0 # Convert to float
 
         place_info = (
             element.id,

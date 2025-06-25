@@ -42,24 +42,23 @@ async def startup_event():
 @app.post("/generate_tour", response_model=List[models.Tour])
 def generate_tour(request: models.GenerateTourRequest):
     """Generate tours based on user request"""
-    try:
-        # Call external API for tour generation
-        response = requests.post(API_URL, json=request.dict())
-        if response.status_code != 200:
-            raise HTTPException(status_code=500, detail="Failed to generate tours")
+
+    response = requests.post(API_URL, json=request.dict())
+    if response.status_code != 200:
+        raise HTTPException(status_code=500, detail="Failed to generate tours")
         
         # Parse and save tours
-        tours_data = response.json()
-        generated_tours = []
-        for tour_data in tours_data:
-            tour = models.Tour(**tour_data)
-            tour_id = save_tour_to_db(tour)
-            tour.tour_id = tour_id
-            generated_tours.append(tour)
+    tours_data = response.json()
+    print(tours_data)
+    generated_tours = []
+    for tour_data in tours_data:
+        tour = models.Tour(**tour_data)
+        tour_id = save_tour_to_db(tour)
+        tour.tour_id = tour_id
+        generated_tours.append(tour)
         
-        return generated_tours
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+    return generated_tours
+
 
 @app.post("/generate_url_tour", response_model=List[models.Tour])
 def generate_url_tour(request: models.GenerateUrlTourRequest):
@@ -197,9 +196,9 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
 
 # User preferences endpoints
 @app.post("/user_interests/{user_id}")
-def save_interests(user_id: int, interests: List[str]):
+def save_interests(user_id: int, request: models.UserInterestsRequest):
     """Save user interests"""
-    result = save_user_interests(user_id, interests)
+    result = save_user_interests(user_id, request.interests)
     if result["status"] == "error":
         raise HTTPException(status_code=500, detail=result["message"])
     return result
@@ -212,7 +211,7 @@ def save_survey(survey: models.UserSurvey):
         raise HTTPException(status_code=500, detail=result["message"])
     return models.SurveyResponse(**result)
 
-@app.get("/user_survey/{user_id}")
+@app.get("/user_survey/{user_id}", response_model=models.UserSurvey)
 def get_survey(user_id: int):
     """Get user survey data"""
     cache_key = f"user_survey:{user_id}"
@@ -276,7 +275,7 @@ def end_city_view_tracking(event: models.CityViewEvent):
     return models.CityViewResponse(**result)
 
 
-@app.get("/analytics/city-view/{user_id}")
+@app.get("/analytics/city-view/{user_id}", response_model=models.CityAnalyticsResponse)
 def get_city_analytics(user_id: int):
     """Get user's city view analytics"""
     result = get_user_city_analytics(user_id)
@@ -285,7 +284,7 @@ def get_city_analytics(user_id: int):
     return result["data"]
 
 
-@app.get("/analytics/city-view/{user_id}/active")
+@app.get("/analytics/city-view/{user_id}/active", response_model=models.ActiveViewsResponse)
 def get_active_views(user_id: int):
     """Get list of cities currently being viewed by user"""
     active_cities = get_active_city_views(user_id)
@@ -298,10 +297,10 @@ def rate_city(rating_data: models.CityRating):
     result = update_city_rating(rating_data.user_id, rating_data.city_name, rating_data.rating)
     if result["status"] == "error":
         raise HTTPException(status_code=400, detail=result["message"])
-    return models.CityRatingResponse(**result)
+    return models.RegisterResponse(**result)
 
 
-@app.get("/city_rating/{user_id}/{city_name}")
+@app.get("/city_rating/{user_id}/{city_name}", response_model=models.CityRatingData)
 def get_city_rating_endpoint(user_id: int, city_name: str):
     """Get current rating for a specific city"""
     result = get_city_rating(user_id, city_name)
@@ -309,8 +308,7 @@ def get_city_rating_endpoint(user_id: int, city_name: str):
         raise HTTPException(status_code=404, detail=result["message"])
     return result["data"]
 
-
-@app.get("/user_city_ratings/{user_id}")
+@app.get("/user_city_ratings/{user_id}", response_model=models.UserCityRatingsResponse)
 def get_user_city_ratings_endpoint(user_id: int):
     """Get all city ratings for a user"""
     result = get_user_city_ratings(user_id)

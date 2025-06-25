@@ -106,3 +106,4 @@ cython_debug/
 .env
 
 venv/
+ve/

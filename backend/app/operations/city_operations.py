@@ -6,7 +6,7 @@ from schemas import models
 import json
 
 
-def add_ready_city(city_data: models.ReadyCity) -> Dict:
+def add_ready_city(city_data: models.UserSurvey) -> Dict:
     """Add a new city to ready_cities table"""
     conn = get_connection()
     cursor = conn.cursor()
