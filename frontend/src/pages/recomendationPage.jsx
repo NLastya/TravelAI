@@ -1,11 +1,14 @@
 /* eslint-disable react/prop-types */
 import React, { useEffect, useState } from "react";
 import Header from "../components/Header";
-import style from "./tourpage.module.css";
+import style from "./recomendationpage.module.css";
 import Filters from "../components/Filters/Filters";
 import VerticalCard from "../components/VerticalCard/VerticalCard";
 import { notification } from "antd";
 import Footer from "../components/Footer/Footer";
+import PaginationCustom from "../components/pagination/pagination";
+import Loader from '../components/Loader/loader';
+import {getGenerateTours} from '../helpers/fetchRoute';
 
 const RecomendationPage = (props) => {
   const [isLoading, setIsLoading] = useState(false);
@@ -35,9 +38,16 @@ const RecomendationPage = (props) => {
       location: "Сибирь",
     },
   ]);
+
+  useEffect(() => {
+    getGenerateTours(props?.form ?? {}, setListTour)
+  }, [])
+
   const [form, setForm] = useState({ location: "", date: "", user_id: 1 });
 
   // const [api, contextHolder] = notification.useNotification();
+
+  const pagination = <PaginationCustom total={listTours.length}/>
 
   const listToursMap = (props?.listTours ?? []).map((item) => (
     <VerticalCard key={item.key} {...item} />
@@ -124,7 +134,11 @@ const RecomendationPage = (props) => {
           dataList={listTours}
           setListTour={setListTour}
         />
+        {isLoading && <div className={style.loaderDiv}><Loader/></div>}
         {!isLoading && listToursMap}
+         <div className={style.paginationDiv}>
+                  {listTours.length != 0 && !isLoading && pagination}
+                  </div>
       </div>
       <Footer />
     </>

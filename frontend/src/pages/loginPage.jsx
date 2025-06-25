@@ -4,6 +4,9 @@ import { Checkbox } from '@heroui/react';
 import getAlert from '../helpers/getAlert';
 import { HOST_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
+import LS from '../store/LS';
+import {LOCALSTORAGEAUTH} from '../config';
+
 
 const Login = (props) => {
     const [form, setForm] = useState({login: '', password: ''});
@@ -12,6 +15,14 @@ const Login = (props) => {
     const navigate = useNavigate();
 
     const handleClick = (e) => {
+        if(LOCALSTORAGEAUTH){
+            const user = LS.get('user')
+            if (user.login === form.login && user.password === user.password)
+                navigate('/popularTours')
+            else
+                getAlert('Ошибка при попытке войти', 'Ошибка', 'messages')
+        }
+            
         e.preventDefault(); 
         fetch(`${HOST_URL}/login`, {
             method: 'POST', 

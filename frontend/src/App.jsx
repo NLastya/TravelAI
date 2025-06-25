@@ -13,6 +13,8 @@ import Login from "./pages/loginPage";
 import Developing from "./pages/developingpage";
 import Registration from "./pages/registrationpage";
 import RecomendationPage from "./pages/recomendationPage";
+import MainPage from "./pages/mainPage";
+import FavoriteToursPage from "./pages/favoritetourspage";
 
 function App() {
   const { isLogged, login, logout } = useAuth();
@@ -40,7 +42,9 @@ function App() {
                 }
               />
 
+              <Route path="/" element={<MainPage/>}/>
               <Route path="/listTours" element={<RecomendationPage />} />
+              <Route path="/favoriteTours/1" element={<FavoriteToursPage />} />
               <Route path="/popularTours" element={<PopularTours />} />
               <Route path="/user/:user_id" element={<PersonalPage />} />
               <Route path="/tour/:tour_id" element={<TourPage />} />

@@ -15,6 +15,8 @@ import {
 } from "ymap3-components";
 import CustomMap from "../components/Map";
 import { getTourById } from "../helpers/fetchRoute";
+import getTourText from "../helpers/getRatingText";
+import getDateText from "../helpers/getDateText";
 
 const TourPage = (props) => {
   const { tour_id } = useParams();
@@ -26,7 +28,12 @@ const TourPage = (props) => {
     rating: 0,
     relevance: 0,
     places: [],
+    description: '',
   });
+
+  let dateDiff = ''
+  if (dataTour.length > 1)
+      dateDiff = new Date(dataTour.date[1] - dataTour.date[0]) 
 
   // TODO: перенести на rtk - query
   useEffect(() => {
@@ -51,25 +58,23 @@ const TourPage = (props) => {
           <div className={style.bothInfoDate}>
             <div className={style.bothInfo}>
               <div className={style.listInfo}>
-                <h3>{props?.name ? props?.name : "Сибирь Тур№1"}</h3>
+                <h3>{props?.name ? dataTour?.tour : "Сибирь Тур№1"}</h3>
                 <p className={style.location}>
                   <imf src="./location.svg" />
-                  {props?.location
-                    ? props?.location
-                    : "Сибирь, ул. Прохорова, 34755"}
+                  {dataTour?.location
+                    ?? "Сибирь, ул. Прохорова, 34755"}
                 </p>
                 <p>
-                  <Rate></Rate> {props.rate ? props?.rate : "5 звезд"}
+                  <Rate></Rate> {(dataTour?.rate ? dataTour?.rate + getTourText(dataTour.rate) : '') ?? "5 звезд"}
                 </p>
-
                 <div className={style.infoRow}></div>
               </div>
               <div>
                 <p>Даты посещения</p>
                 <p className={style.date}>
-                  {props?.date ? props?.date : "26.01.25 - 30.01.25"}
+                  {dataTour?.date ? dataTour?.date : "26.01.25 - 30.01.25"}
                 </p>
-                <p>5 дней</p>
+                <p>{(dateDiff ? dateDiff + getDateText(dateDiff) : '') ?? '5 дней'}</p>
               </div>
             </div>
             <div className={style.buttons}>
@@ -100,6 +105,8 @@ const TourPage = (props) => {
               <YMapDefaultSchemeLayer />
               <YMapDefaultFeaturesLayer />
               <YMapDefaultMarker coordinates={[60, 105]} />
+
+              
             </YMap>
           </YMapComponentsProvider>
         </div>

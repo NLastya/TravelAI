@@ -6,7 +6,6 @@ import { useNavigate } from "react-router-dom";
 
 const VerticalCard = ({ id }, ...props) => {
   const navigate = useNavigate();
-
   return (
     <div
       className={style.card}
@@ -41,7 +40,7 @@ const VerticalCard = ({ id }, ...props) => {
         <div className={style.buttons}>
           <button
             className={"mint-btn"}
-            onClick={navigate("/tour/" + (id ?? "1"))}
+            onClick={() =>{navigate("/tour/" + (id ?? "1"))}}
           >
             Посмотреть тур
           </button>

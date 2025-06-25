@@ -28,7 +28,7 @@ const PersonalPage = ({setListTour}) => {
 
         <h2>Действия</h2>
         <div className={style.operations}>
-            <button className='operations-btn'>Избранное</button>
+            <button className='operations-btn' onClick={() => {navigate('/favoritetours/1')}}>Избранное</button>
             <button className='operations-btn'
             onClick={(e) => {setModal(prev => !prev);}}
             >Сгенерировать тур</button>

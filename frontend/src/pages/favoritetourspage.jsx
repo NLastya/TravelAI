@@ -10,7 +10,7 @@ import { HOST_URL } from "../config";
 import PaginationCustom from "../components/pagination/pagination";
 import Loader from '../components/Loader/loader';
 
-const PopularTours = (props) => {
+const FavoriteToursPage = (props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [listTours, setListTour] = useState([
     {
@@ -38,7 +38,7 @@ const PopularTours = (props) => {
       location: "Сибирь",
     },
   ]);
-  const [form, setForm] = useState({ location: "", date: "" });
+//   const [form, setForm] = useState({ location: "", date: "" });
 
   const [api, contextHolder] = notification.useNotification();
 
@@ -94,8 +94,7 @@ const PopularTours = (props) => {
     <>
       <div className={style.main}>
         <Header user={props?.user ? props.user : {}} />
-        <h2>Найти тур</h2>
-        <Filters form={form} setForm={setForm} marginBottom={"20px"} />
+        <h2>Избранные туры</h2>
         <div className={style.cardsContainer}>
           {isLoading && <div className={style.loaderDiv}><Loader/></div>}
           {!isLoading && listToursMap
@@ -110,4 +109,4 @@ const PopularTours = (props) => {
   );
 };
 
-export default PopularTours;
+export default FavoriteToursPage;

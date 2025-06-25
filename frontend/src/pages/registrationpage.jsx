@@ -1,8 +1,10 @@
 import {useState} from 'react';
-import style from './loginpage.module.css'
+import style from './loginpage.module.css';
 import getAlert from '../helpers/getAlert';
 import { HOST_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
+import LS from '../store/LS';
+import {LOCALSTORAGEAUTH} from '../config';
 
 const Registration = (props) => {
     const [form, setForm] = useState({login: '', password: '', twice_password: '', city: '', name: ''});
@@ -10,6 +12,12 @@ const Registration = (props) => {
     const navigate = useNavigate();
 
     const handleClick = (e) => {
+        if(LOCALSTORAGEAUTH){
+            LS.set('user', JSON.stringify({login: form.login, password: form.password, city: form.city, name: form.name}))
+            navigate('/user/1')
+        }
+        
+        else{
         fetch(`${HOST_URL}/register`,
             {
                 method: 'POST',
@@ -29,6 +37,7 @@ const Registration = (props) => {
             getAlert('Ошибка при попытке войти', err.message, 'messages')
         }
         )
+    }
     }
 
     return (<div className={style.main}>
