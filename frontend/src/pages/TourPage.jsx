@@ -14,24 +14,23 @@ import {
   // ...other components
 } from "ymap3-components";
 import CustomMap from "../components/Map";
+import { getTourById } from "../helpers/fetchRoute";
 
 const TourPage = (props) => {
   const { tour_id } = useParams();
-  const [dataTour, setDataTour] = useState({});
+  const [dataTour, setDataTour] = useState({
+    tour_id: -1,
+    title: "",
+    date: "",
+    location: "",
+    rating: 0,
+    relevance: 0,
+    places: [],
+  });
+
   // TODO: перенести на rtk - query
   useEffect(() => {
-    fetch(`${HOST_URL}/tour/1`)
-      .then((res) => res.json())
-      .then((res) => {
-        setDataTour(res);
-      })
-      .catch((e) => {
-        console.log(e);
-        // TODO: написать моки чтобы работал переход вне catch
-        // api.error({message: `Код ошибки: ${e.code}`,
-        //     description: e.message,
-        //     placement: 'bottomRight'});
-      });
+    getTourById(tour_id, setDataTour);
   }, []);
 
   const [location, setLocation] = useState({

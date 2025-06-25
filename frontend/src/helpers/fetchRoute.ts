@@ -78,3 +78,21 @@ export const getGenerateTours = (
       // });
     });
 };
+
+export const getTourById = (
+  tour_id,
+  fetchData = {},
+  storeSaveFunc = (data) => {}
+) => {
+  fetch(`${HOST_URL}/tour/${tour_id}`)
+    .then((res) => res.json())
+    .then((data) => storeSaveFunc(data))
+    .catch((e) => {
+      console.log(e);
+      // api.error({
+      //   message: `Код ошибки: ${e.code || "unknown"}`,
+      //   description: e.message,
+      //   placement: "bottomRight",
+      // });
+    });
+};
