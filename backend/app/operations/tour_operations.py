@@ -3,6 +3,9 @@ from database.database import get_connection
 from schemas import models
 import os
 from dotenv import load_dotenv
+import requests
+from bs4 import BeautifulSoup
+import urllib.parse
 
 load_dotenv()
 API_URL = os.getenv('API_URL', 'http://127.0.0.1:8002/api/v1/search_location')
@@ -94,6 +97,23 @@ def save_tour_to_db(tour_data, url=None):
     finally:
         conn.close()
 
+def get_first_google_image_url(query):
+    search_url = f"https://www.google.com/search?q={urllib.parse.quote(query)}&tbm=isch"
+    headers = {
+        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36"
+    }
+    try:
+        response = requests.get(search_url, headers=headers, timeout=5)
+        response.raise_for_status()
+        soup = BeautifulSoup(response.text, 'html.parser')
+        img_tag = soup.find("img", {"class": "yWs4tf"})
+        if img_tag and "src" in img_tag.attrs:
+            return img_tag["src"]
+        else:
+            return "https://via.placeholder.com/150"
+    except Exception:
+        return "https://via.placeholder.com/150"
+
 def get_tour_by_id(tour_id: int):
     """Get tour data by ID"""
     conn = get_connection()
@@ -122,6 +142,9 @@ def get_tour_by_id(tour_id: int):
         
         for place_row in cursor.fetchall():
             place_row = [0] + list(place_row)
+            photo_url = place_row[7]
+            if not photo_url or photo_url == "https://via.placeholder.com/150":
+                photo_url = get_first_google_image_url(place_row[1])
             places.append(models.Places(
                 id_place=place_row[0],
                 name=place_row[1],
@@ -129,7 +152,7 @@ def get_tour_by_id(tour_id: int):
                 rating=place_row[3],
                 date=f"{place_row[4]} - {place_row[5]}" if place_row[4] and place_row[5] else str(place_row[4] or place_row[5]),
                 description=place_row[6],
-                photo=place_row[7],
+                photo=photo_url,
                 mapgeo=[place_row[8], place_row[9]]
             ))
         
@@ -139,13 +162,14 @@ def get_tour_by_id(tour_id: int):
         return models.Tour(
             tour_id=tour_id,
             title=tour_row[0],
-            date=[tour_row[1], tour_row[2]],
+            date=[tour_row[1] or '', tour_row[2] or ''],
             location=tour_row[3],
             rating=tour_row[4],
             relevance=tour_row[5],
             url=tour_row[6],
             places=places,
-            categories=categories
+            categories=categories,
+            description="Увлекательный тур для всей семьи!"
         )
     finally:
         conn.close()

@@ -35,6 +35,7 @@ class Tour(BaseModel):
     rating: float
     relevance: float
     places: List[Places] = None
+    description: str = "Увлекательный тур для всей семьи!"
 
 class GenerateTourRequest(BaseModel):
     user_id: int
@@ -114,7 +115,7 @@ class UserSurvey(BaseModel):
     s_semej: Optional[bool] = None
     v_odinochku: Optional[bool] = None
     paroj: Optional[bool] = None
-    kuhnya: Optional[bool] = None
+    kuhnya: Optional[str] = None
 
 class SurveyResponse(BaseModel):
     status: str

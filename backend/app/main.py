@@ -1,5 +1,5 @@
 from fastapi import FastAPI, HTTPException, Query
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi.middleware.cors import CORSMiddleware
 
 from operations.auth import login_user, register_user
@@ -53,6 +53,7 @@ def generate_tour(request: models.GenerateTourRequest):
     generated_tours = []
     for tour_data in tours_data:
         tour = models.Tour(**tour_data)
+        tour.description = "Увлекательный тур для всей семьи!"
         tour_id = save_tour_to_db(tour)
         tour.tour_id = tour_id
         generated_tours.append(tour)
@@ -69,6 +70,7 @@ def generate_url_tour(request: models.GenerateUrlTourRequest):
         generated_tours = []
         for tour_data in tours_data:
             tour = models.Tour(**tour_data)
+            tour.description = "Увлекательный тур для всей семьи!"
             tour_id = save_tour_to_db(tour, url=request.url)
             tour.tour_id = tour_id
             generated_tours.append(tour)
@@ -78,11 +80,27 @@ def generate_url_tour(request: models.GenerateUrlTourRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Tour retrieval endpoints
-@app.get("/tour/{tour_id}", response_model=models.Tour)
-def tour(tour_id: int, current_user_id: Optional[int] = None):
-    """Get tour by ID"""
+@app.get("/tour/{tour_id}", response_model=Union[models.Tour, List[models.Tour]])
+def tour(tour_id: str, current_user_id: Optional[int] = None):
+    """Get tour by ID or all tours if tour_id == 'all'"""
+    if tour_id == 'all':
+        # Получить все туры из базы
+        from operations.tour_operations import get_popular_tours
+        tours = get_popular_tours()
+        # Check favorite status for the list
+        if current_user_id:
+            favorite_tour_ids = get_user_favorite_tour_ids(current_user_id)
+            for tour_item in tours:
+                if tour_item.tour_id in favorite_tour_ids:
+                    tour_item.is_favorite = True
+        return tours
+    
+    tour_id = int(tour_id)
     cache_key = f"tour:{tour_id}"
-    cached_tour_json = redis_client.get(cache_key)
+    try:
+        cached_tour_json = redis_client.get(cache_key)
+    except Exception:
+        cached_tour_json = None
     
     tour_obj = None
     if cached_tour_json:
@@ -92,7 +110,10 @@ def tour(tour_id: int, current_user_id: Optional[int] = None):
         if not tour_obj:
             raise HTTPException(status_code=404, detail="Tour not found")
         # Cache the original tour object from DB
-        redis_client.set(cache_key, tour_obj.json(), ex=600)
+        try:
+            redis_client.set(cache_key, tour_obj.json(), ex=600)
+        except Exception:
+            pass
 
     # Check favorite status if user is provided, but don't cache this result
     if current_user_id:
