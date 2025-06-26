@@ -159,4 +159,61 @@ def cleanup_expired_views() -> None:
         # This function can be called by a scheduled task
         pass
     except Exception as e:
-        print(f"Error cleaning up expired views: {e}") 
+        print(f"Error cleaning up expired views: {e}")
+        
+#для последней ручки
+def save_city_view_event(user_id: int, city_name: str) -> Dict:
+    """Save city view event (user viewed city for more than 2 minutes)"""
+    conn = get_connection()
+    cursor = conn.cursor()
+
+    try:
+        # Get current survey data
+        cursor.execute('''
+        SELECT cities_prosmotr_more, cities_prosmotr_less 
+        FROM user_surveys WHERE user_id = ?
+        ''', (user_id,))
+
+        row = cursor.fetchone()
+        if not row:
+            # Create new survey record if doesn't exist
+            cursor.execute('''
+            INSERT INTO user_surveys (user_id, cities_prosmotr_more, cities_prosmotr_less)
+            VALUES (?, '', '')
+            ''', (user_id,))
+            cities_more = ""
+            cities_less = ""
+        else:
+            cities_more = row[0] or ""
+            cities_less = row[1] or ""
+
+        # Parse existing cities
+        more_cities = set(cities_more.split(',')) if cities_more else set()
+        less_cities = set(cities_less.split(',')) if cities_less else set()
+
+        # Remove city from both lists if it exists
+        more_cities.discard(city_name)
+        less_cities.discard(city_name)
+
+        # Add city to "more" list since user viewed it for more than 2 minutes
+        more_cities.add(city_name)
+
+        # Update database
+        cursor.execute('''
+        UPDATE user_surveys 
+        SET cities_prosmotr_more = ?, cities_prosmotr_less = ?
+        WHERE user_id = ?
+        ''', (','.join(more_cities), ','.join(less_cities), user_id))
+
+        conn.commit()
+
+        return {
+            "status": "success",
+            "message": f"Saved city view event for {city_name}"
+        }
+
+    except Exception as e:
+        conn.rollback()
+        return {"status": "error", "message": str(e)}
+    finally:
+        conn.close()
