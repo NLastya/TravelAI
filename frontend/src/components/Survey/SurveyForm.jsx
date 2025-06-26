@@ -1,18 +1,56 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import CheckboxCustom from './CheckboxCustom';
-import './SurveyForm.css'
+import './SurveyForm.css';
+import { postUserInterests} from '../../helpers/fetchRoute';
+import { LOCALSTORAGEAUTH } from '../../config';
+import LS from '../../store/LS';
+import { HOST_URL } from '../../config';
+import { useNavigate } from 'react-router-dom';
 
-const SurveyForm = () => {
+
+const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
+  const navigate = useNavigate();
+  const [isSuccessful, setIsSuccessfull] = useState(false);
+
+  const postRegistration = (form, setIsSuccessfull) => {
+        if(LOCALSTORAGEAUTH){
+            LS.set('user', JSON.stringify({login: form.login, password: form.password, city: form.city, name: form.name}))
+            navigate('/user/1')
+        }
+        else{
+        fetch(`${HOST_URL}/register`,
+            {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json', 
+                },
+                body: JSON.stringify({login: form.login, password: form.password, city: form.city, name: form.name})
+            }
+        ).then(res => {
+            if(!res.ok)
+                throw new Error('error connection')
+        }).then(body => {
+          // setIsSuccessfull(true)
+            // setIsLogged(true)
+            navigate('/popularTours');
+        })
+        .catch(err => {
+            // getAlert('Ошибка при попытке войти', err.message, 'messages')
+        }
+        )}
+    }
+
+
   const surveyData = [
     {
       id: 0,
       question: "Какие виды отдыха вас интересуют?",
       options: [
-        { id: 0, text: "Деловой" },
-        { id: 1, text: "Этнический" },
-        { id: 2, text: "Спортивный" },
-        { id: 3, text: "Познавательный или культурно-развлекательный тур"},
-        { id: 4, text: "Религиозный (в т.ч. паломничество)"}
+        { id: "delovoy", text: "Деловой" },
+        { id: "etnicheskiy", text: "Этнический" },
+        { id: "sportivnyj", text: "Спортивный" },
+        { id: "poznavatelnyj_kulturno_razvlekatelnyj", text: "Познавательный или культурно-развлекательный тур"},
+        { id: "religioznyj", text: "Религиозный (в т.ч. паломничество)"}
       ],
       isOneChoose: false
     },
@@ -20,11 +58,11 @@ const SurveyForm = () => {
       id: 1,
       question: "Как вы предпочитаете путешествовать?",
       options: [
-        { id: 0, text: "С детьми" },
-        { id: 1, text: "С семьей"},
-        { id: 2, text: "С компанией среднего возраста 15-24 лет" },
-        { id: 3, text: "С компанией среднего возраста 25-44 лет" },
-        { id: 4, text: "С компанией среднего возраста 45-64 лет" },
+        { id: "s_detmi", text: "С детьми" },
+        { id: "s_semej", text: "С семьей"},
+        { id: "s_kompaniej_15_24", text: "С компанией среднего возраста 15-24 лет" },
+        { id: "s_kompaniej_25_44", text: "С компанией среднего возраста 25-44 лет" },
+        { id: "s_kompaniej_45_66", text: "С компанией среднего возраста 45-64 лет" },
       ],
       isOneChoose: false
     },
@@ -32,16 +70,15 @@ const SurveyForm = () => {
       id: 2,
       question: "Какие у вас предпочтения в кухне?",
       options: [
-        { id: 0, text: "Русская" },
-        { id: 1, text: "Грузинская" },
-        { id: 2, text: "Европейская" },
-        { id: 3, text: "Восточная"},
-        { id: 4, text: "Индийская"}
+        { id: "russian", text: "Русская" },
+        { id: "gryzinskaya", text: "Грузинская" },
+        { id: "evropeiskya", text: "Европейская" },
+        { id: "vostochnaya", text: "Восточная"},
+        { id: "indiskaya", text: "Индийская"}
       ],
-      isOneChoose: false
-    },
-  ];
-
+      isOneChoose: false  
+    }
+];
   const [answers, setAnswers] = useState({});
 
   const handleAnswerChange = (questionId, selectedOptions) => {
@@ -53,16 +90,26 @@ const SurveyForm = () => {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-        const formattedAnswers = surveyData.map(question => ({
-        questionId: question.id,
-        questionText: question.question,
-        selectedOptions: answers[question.id] || [],
-        selectedOptionsTexts: (answers[question.id] || []).map(optionId => 
-        question.options.find(opt => opt.id === optionId)?.text || '')
-    }));
-    
-    console.log("Форма отправлена. Ответы:", formattedAnswers);
+    let resData = {};
+    console.log('res:', answers)
+      for (const key in answers) {
+        if (Object.prototype.hasOwnProperty.call(answers, key)) {
+          for (let i in answers[key]) {
+            const item = answers[key][i]
+            resData[item] = true;
+          }
+        }
+      }
+
+    console.log('survey:', resData)
+    postRegistration({...form[1]}, setIsSuccessfull)
+    postUserInterests(1, {...form[2], ...resData}, () => {}, setIsSuccessfull)
   };
+
+  useEffect(() => {
+    if(isSuccessful) navigate('/popularTours')
+  },
+[isSuccessful])
 
   return (
     <form onSubmit={handleSubmit} className="survey-form">

@@ -2,4 +2,4 @@
 export const HOST_URL = 'http://localhost:5173';
 export const MAP_API = 'f89c0e7b-a313-4f70-a281-dc79a420cdcf';
 
-export const LOCALSTORAGEAUTH = true;
+export const LOCALSTORAGEAUTH = false;

@@ -12,6 +12,16 @@ const { RangePicker } = DatePicker;
 import {options} from '../../consts';
 
 
+const dateToBd = (date) => {
+  console.log(typeof(date), date)
+    const y = date.getYear()
+    const m = date.getMonth() + 1
+    const d = date.getDate()
+
+    console.log('date:', `${d}.${m}.${y}`)
+    return `${d}.${m}.${y}`
+}
+
 
 const end_date = (new Date()).getTime() + 432000 * 1000;
 
@@ -22,23 +32,26 @@ const ModalForm = ({setModal, setListTour}) => {
 
     const handleChange = (value) => {setForm(prev => ({...prev, hobbies: [value]}))}
 
-    useEffect(() => {
-      console.log('rerender!')
-    }, [])
-
     const sendForm = () => {
         console.log(form)
         if(!(form.location && form.data_start && form.data_end && form.hobbies)) {
             setFormError(true);
         } else {
-          console.log('form:', form)
+          console.log('form:', {})
             fetch(`${HOST_URL}/generate_tour`, {
                 method: 'POST', 
                 headers: {
                   'Content-Type': 'application/json', 
                   'ngrok-skip-browser-warning': true,
                 },
-                body: JSON.stringify(form ?? { 
+                body: JSON.stringify(
+                  // eslint-disable-next-line no-constant-binary-expression
+                  {...form, 
+                    data_start: typeof(data_start) === 'Date' ? dateToBd(form?.date_start) : form?.data_start,
+                    data_end: typeof(data_end) === 'Date' ? dateToBd(form?.date_end) : form?.data_end,
+                    }
+
+                  ?? { 
                   user_id: 2,
                   data_start: '26.01.25',
                   data_end: '30.01.25',
@@ -81,7 +94,7 @@ const ModalForm = ({setModal, setListTour}) => {
                 format="YYYY-MM-DD"
                 allowClear={false}
                  onChange={(value) => {
-                    setForm(prev => ({...prev, data_start: (value[0]).format('YYYY-MM-DD'), data_end: (value[1]).format('YYYY-MM-DD') }))
+                    setForm(prev => ({...prev, data_start: dateToBd((value[0]).format('DD-MM-YYYY')), data_end: dateToBd(value[1]).format('DD-MM-YYYY') }))
                     console.log((value[0]).format('DD-MM-YYYY'))
                  }
                 }

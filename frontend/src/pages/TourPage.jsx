@@ -17,6 +17,9 @@ import CustomMap from "../components/Map";
 import { getTourById } from "../helpers/fetchRoute";
 import getTourText from "../helpers/getRatingText";
 import getDateText from "../helpers/getDateText";
+import CardTour from "../components/cardTour/cardTour";
+import RatingCard from '../components/ratingCard';
+import ButtonLike from '../components/buttonLike';
 
 const TourPage = (props) => {
   const { tour_id } = useParams();
@@ -29,6 +32,7 @@ const TourPage = (props) => {
     relevance: 0,
     places: [],
     description: '',
+    features: [],
   });
 
   let dateDiff = ''
@@ -58,18 +62,20 @@ const TourPage = (props) => {
           <div className={style.bothInfoDate}>
             <div className={style.bothInfo}>
               <div className={style.listInfo}>
+                <div className={style.innerRatingRow}>
                 <h3>{props?.name ? dataTour?.tour : "Сибирь Тур№1"}</h3>
-                <p className={style.location}>
-                  <imf src="./location.svg" />
-                  {dataTour?.location
-                    ?? "Сибирь, ул. Прохорова, 34755"}
-                </p>
-                <p>
-                  <Rate></Rate> {(dataTour?.rate ? dataTour?.rate + getTourText(dataTour.rate) : '') ?? "5 звезд"}
-                </p>
-                <div className={style.infoRow}></div>
+                <Rate></Rate> {(dataTour?.rate ? dataTour?.rate + getTourText(dataTour.rate) : '') ?? "5 звезд"}              
+                <div className={style.infoRow}>
               </div>
-              <div>
+                </div>
+                <p className={style.location}>
+                  <img src="/icons/location.svg" />
+                  <span>{ "Сибирь, ул. Прохорова, 34755"}</span>
+                </p>
+                <RatingCard rating={dataTour?.rating ?? '4.2'}/>
+              </div>
+
+              <div className={style.dateVisit}>
                 <p>Даты посещения</p>
                 <p className={style.date}>
                   {dataTour?.date ? dataTour?.date : "26.01.25 - 30.01.25"}
@@ -78,39 +84,37 @@ const TourPage = (props) => {
               </div>
             </div>
             <div className={style.buttons}>
+             <ButtonLike/>
               <button className={"mint-btn"}>Посмотреть тур</button>
-              <button className={"btn-like"}>
-                <img src="./icons/like.svg" />
-              </button>
             </div>
           </div>
         </div>
-
+        <div className={style.cardsTourDiv}>
+        </div>
         <div className={style.disc}>
-          <h3>Описание</h3>
+          <h3 className={style.h3dsic}>Описание</h3>
           <p>
             {props?.description
               ? props?.description
               : "Насыщенный впечатлениями маршрут сразу по трем Сибирским регионам! Вас ждут уникальные музеи Хакасии с гастрономией региона, сибирская деревня \
                  – Шушенское, буддийские артефакты Тувы, мировое достояние – золото Скифов и музыка хоомей."}
           </p>
+          <div className={style.cards}>
+            {(props?.features ?? []).map((id, item)=> <CardTour title={item} key={id}/>)}
+            <CardTour title={'item'}/>
+            <CardTour title={'item'}/>
+            <CardTour title={'item'}/>
+          </div>
         </div>
-
         <div className={style.map}>
-          <h3>Маршрут</h3>
-          <YMapComponentsProvider
-            apiKey={"9bb13193-cc52-4a38-88b3-11179a14242c"}
-          >
-            <YMap location={location}>
-              <YMapDefaultSchemeLayer />
-              <YMapDefaultFeaturesLayer />
-              <YMapDefaultMarker coordinates={[60, 105]} />
-
-              
-            </YMap>
-          </YMapComponentsProvider>
+          <div className={style.s}>
+            <h3>Маршрут</h3>
+            <button onClick={() => {window.location.href = "https://yandex.ru/maps/213/moscow/?ll=37.740444%2C55.651073&z=10";}}>Посмортеть на Яндекс Карте</button>
+          </div>
         </div>
+        <div className={style.mapDiv}>
         <CustomMap routeArr={routeArr} />
+        </div>
       </div>
       <Footer />
     </>

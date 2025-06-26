@@ -96,3 +96,202 @@ export const getTourById = (
       // });
     });
 };
+
+export const postUserInterests = (user_id, fetchData={}, storeSaveFunc, setIsSuccessfull) => {
+  console.log('data:', fetchData)
+    fetch(`${HOST_URL}/user_survey/`, {
+      method: 'POST',
+      body: JSON.stringify(fetchData),
+      headers: {
+        "Content-Type": "application/json",
+        // "ngrok-skip-browser-warning": true,
+      },
+    })
+    .then((res) => res.json())
+    .then((data) => {
+      setIsSuccessfull(true)
+      storeSaveFunc(data)
+    })
+    .catch((e) => {
+      setIsSuccessfull(true)
+      console.log(e);
+    });
+}
+
+
+export const getUserSurvey = async (userId, saveDataState, isError) => {
+  try {
+    const response = await fetch(`/user_survey/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in getUserSurvey:', error);
+  }
+};
+
+
+export const startCityView = async (userId, cityName, timestamp, saveDataState, isError) => {
+  try {
+    const response = await fetch('/analytics/city-view/start', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        city_name: cityName,
+        timestamp,
+        action: 'start'
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in startCityView:', error);
+  }
+};
+
+export const endCityView = async (userId, cityName, timestamp, saveDataState, isError) => {
+  try {
+    const response = await fetch('/analytics/city-view/end', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        city_name: cityName,
+        timestamp,
+        action: 'end'
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in endCityView:', error);
+  }
+};
+
+
+export const getCityViewsAnalytics = async (userId, saveDataState, isError) => {
+  try {
+    const response = await fetch(`/analytics/city-view/${userId}`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in getCityViewsAnalytics:', error);
+  }
+};
+
+export const getActiveCityViews = async (userId, saveDataState, isError) => {
+  try {
+    const response = await fetch(`/analytics/city-view/${userId}/active`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in getActiveCityViews:', error);
+  }
+};
+
+
+export const addFavorite = async (userId, tourId, saveDataState, isError) => {
+  try {
+    const response = await fetch('/favorites', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        tour_id: tourId
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in addFavorite:', error);
+  }
+};
+
+export const removeFavorite = async (userId, tourId, saveDataState, isError) => {
+  try {
+    const response = await fetch('/favorites', {
+      method: 'DELETE',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        user_id: userId,
+        tour_id: tourId
+      }),
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in removeFavorite:', error);
+  }
+};
+
+
+export const getUserFavorites = async (userId, saveDataState, isError) => {
+  try {
+    const response = await fetch(`/users/${userId}/favorites`, {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+    
+    const data = await response.json();
+    saveDataState(data);
+  } catch (error) {
+    isError(error.message);
+    console.error('Error in getUserFavorites:', error);
+  }
+};
+

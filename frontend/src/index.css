@@ -21,6 +21,7 @@
 
   --mint-color: #8DD3BB;
   --mint-color-secondary: #35b789;
+  --mint-color-third: #25906b;
   --grey-text: #112211;
   /* overflow-x: hidden; */
 }
@@ -108,15 +109,20 @@ button:focus-visible {
 .mint-btn {
   background-color: var(--mint-color);
   color: black;
-  padding: 8px 17px 10px;
   font-size: 16px;
   border-radius: 4px;
+  padding: 14px 14px;
+}
+
+.mint-button:hover {
+  background-color: var(--mint-color-secondary);
 }
 
 .btn-like {
   border: 1px solid var(--mint-color);
-  padding: 6px 4.5px 2px 3.5px;
-  width: 41px;
+  padding: 14px 14px;
+  /* width: 41px; */
+  border-radius: 4px;
 }
 
 .operations-btn {
@@ -170,4 +176,9 @@ button:focus-visible {
   a:hover {
       color: var(--mint-color-secondary);
   }
+}
+
+/* Reting Antd */
+:where(.css-dev-only-do-not-override-1wwf28x).ant-rate .ant-rate-star:not(:last-child) {
+  margin-right: 0px;
 }

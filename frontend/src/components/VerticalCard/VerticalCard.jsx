@@ -3,6 +3,7 @@ import React from "react";
 import { Rate } from "antd";
 import style from "./card.module.css";
 import { useNavigate } from "react-router-dom";
+import ButtonLike from '../../components/buttonLike';
 
 const VerticalCard = ({ id }, ...props) => {
   const navigate = useNavigate();
@@ -44,9 +45,7 @@ const VerticalCard = ({ id }, ...props) => {
           >
             Посмотреть тур
           </button>
-          <button className={"btn-like"}>
-            <img src="./icons/like.svg" />
-          </button>
+          <ButtonLike/>
         </div>
       </div>
     </div>
