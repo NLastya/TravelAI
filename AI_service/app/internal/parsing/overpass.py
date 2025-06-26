@@ -30,7 +30,15 @@ def get_centroid_latlon(way_or_relation):
         lat = sum(c[0] for c in coords) / len(coords)
         lon = sum(c[1] for c in coords) / len(coords)
         return lat, lon
-    return "", ""
+    # fallback: пробуем взять center_lat/center_lon если есть
+    lat = getattr(way_or_relation, 'center_lat', None)
+    lon = getattr(way_or_relation, 'center_lon', None)
+    if lat is not None and lon is not None:
+        try:
+            return float(lat), float(lon)
+        except (TypeError, ValueError):
+            pass
+    return None, None
 
 # Главная функция
 def fetch_places_to_sqlite(city_name: str, db_name: str = "places.db"):
@@ -83,8 +91,8 @@ def fetch_places_to_sqlite(city_name: str, db_name: str = "places.db"):
             lon = float(element.lon)  # Convert to float
         else:
             lat, lon = get_centroid_latlon(element)
-            lat = float(lat) if lat != "" else 0.0 # Convert to float
-            lon = float(lon) if lon != "" else 0.0 # Convert to float
+            lat = float(lat) if lat is not None else 0.0 # Convert to float
+            lon = float(lon) if lon is not None else 0.0 # Convert to float
 
         place_info = (
             element.id,

@@ -55,8 +55,8 @@ def save_tour_to_db(tour_data, url=None):
         VALUES (?, ?, ?, ?, ?, ?, ?)
         ''', (
             tour_data.title,
-            "21.01",
-            "22.01",
+            tour_data.date[0] if hasattr(tour_data, 'date') and len(tour_data.date) > 0 else None,
+            tour_data.date[1] if hasattr(tour_data, 'date') and len(tour_data.date) > 1 else None,
             tour_data.location,
             tour_data.rating,
             tour_data.relevance,
@@ -76,8 +76,8 @@ def save_tour_to_db(tour_data, url=None):
                 place.name,
                 place.location,
                 place.rating,
-                "21.01",
-                "22.01",
+                getattr(place, 'date_start', None) if hasattr(place, 'date_start') else None,
+                getattr(place, 'date_end', None) if hasattr(place, 'date_end') else None,
                 place.description,
                 place.photo,
                 place.mapgeo[0],
