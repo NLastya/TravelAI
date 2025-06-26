@@ -13,6 +13,9 @@ import os
 import sqlite3
 from app.internal.parsing.overpass import fetch_places_to_sqlite, translit_name
 from datetime import datetime, timedelta
+from app.internal.recommend_cities import recommend_cities
+import threading
+import requests
 
 router = APIRouter(
     prefix="/api/v1"
@@ -27,7 +30,53 @@ S3_SECRET_KEY = os.getenv('S3_SECRET_KEY')
 S3_URI = os.getenv('S3_HOST')
 S3_PORT = os.getenv('S3_PORT')
 
+# --- RECOMMEND CITIES MODEL GLOBALS ---
+model_lock = threading.Lock()
+city_model = None
+city_df = None
+city_dataset = None
+city_user_features = None
+city_item_features = None
 
+# --- LIFESPAN EVENT ---
+def on_startup():
+    global city_model, city_df, city_dataset, city_user_features, city_item_features
+    with model_lock:
+        city_model, city_df, city_dataset, city_user_features, city_item_features = recommend_cities.train_model(
+            'app/internal/recommend_cities/data.xlsx'
+        )
+
+from fastapi import Request, BackgroundTasks
+from fastapi import status
+from fastapi.responses import JSONResponse
+
+@router.on_event("startup")
+def startup_event():
+    on_startup()
+
+# --- ENDPOINT: TRAIN MODEL MANUALLY ---
+@router.post("/train_cities")
+def train_cities_endpoint():
+    try:
+        on_startup()
+        return {"status": "ok", "message": "Model trained"}
+    except Exception as e:
+        return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"error": str(e)})
+
+# --- ENDPOINT: RECOMMEND CITIES ---
+from fastapi import Query
+
+@router.get("/recommend_cities/{user_id}")
+def recommend_cities_endpoint(user_id: int, n: int = Query(5, ge=1, le=20)):
+    global city_model, city_df, city_dataset, city_user_features, city_item_features
+    with model_lock:
+        if city_model is None:
+            return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"error": "Model not trained"})
+        try:
+            recs = recommend_cities.recommend(user_id, city_model, city_df, city_dataset, city_user_features, city_item_features, n=n)
+            return {"user_id": user_id, "recommendations": recs}
+        except Exception as e:
+            return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"error": str(e)})
 
 @dataclass
 class Generate(BaseModel):
@@ -185,11 +234,38 @@ def generate(data: GenerateTourRequest):
     today = datetime.now().date().isoformat()
     filtered_places = []
 
+    def get_wikimedia_image_url(place_name):
+        # url = "https://en.wikipedia.org/w/api.php"
+        # params = {
+        #     "action": "query",
+        #     "format": "json",
+        #     "prop": "pageimages",
+        #     "titles": place_name,
+        #     "pithumbsize": 400
+        # }
+        # try:
+        #     response = requests.get(url, params=params, timeout=2)
+        #     data = response.json()
+        #     pages = data.get("query", {}).get("pages", {})
+        #     for page in pages.values():
+        #         if "thumbnail" in page:
+        #             return page["thumbnail"]["source"]
+        # except Exception as e:
+        #     print("Wiki image error:", e)
+        return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGKPdm1NTslz32yLdZKLBH41Pu4fPBu7ggAQ&s"
+
     for (id_, name, category, rating, hours, lat, lon) in rows:
         '''if not match_weather(category):
             continue
         if not match_hobby(category):
             continue'''
+
+        # Генерация короткого описания
+        try:
+            short_desc = llm.generate_short_description(name, category)
+        except Exception as e:
+            print(f"Short description generation error: {e}")
+            short_desc = category
 
         place = Places(
             id_place=id_,
@@ -197,8 +273,8 @@ def generate(data: GenerateTourRequest):
             location=city,
             rating=rating,
             date=today,
-            description=category,
-            photo="https://via.placeholder.com/150",
+            description=short_desc,
+            photo=get_wikimedia_image_url(name),
             mapgeo=[lat, lon]
         )
         filtered_places.append(place)
@@ -233,5 +309,62 @@ def generate(data: GenerateTourRequest):
     print(tours)
 
     return tours
+
+class UserSurvey(BaseModel):
+    user_id: int
+    gender: Optional[str] = None
+    age_group: Optional[str] = None
+    cities_5: Optional[str] = None
+    cities_4: Optional[str] = None
+    cities_3: Optional[str] = None
+    cities_2: Optional[str] = None
+    cities_1: Optional[str] = None
+    izbrannoe: Optional[str] = None
+    cities_prosmotr_more: Optional[str] = None
+    cities_prosmotr_less: Optional[str] = None
+    poznavatelnyj_kulturno_razvlekatelnyj: Optional[bool] = None
+    delovoy: Optional[bool] = None
+    etnicheskiy: Optional[bool] = None
+    religioznyj: Optional[bool] = None
+    sportivnyj: Optional[bool] = None
+    obrazovatelnyj: Optional[bool] = None
+    ekzotic: Optional[bool] = None
+    ekologicheskiy: Optional[bool] = None
+    selskij: Optional[bool] = None
+    lechebno_ozdorovitelnyj: Optional[bool] = None
+    sobytijnyj: Optional[bool] = None
+    gornolyzhnyj: Optional[bool] = None
+    morskie_kruizy: Optional[bool] = None
+    plyazhnyj_otdykh: Optional[bool] = None
+    s_detmi: Optional[bool] = None
+    s_kompaniej_15_24: Optional[bool] = None
+    s_kompaniej_25_44: Optional[bool] = None
+    s_kompaniej_45_66: Optional[bool] = None
+    s_semej: Optional[bool] = None
+    v_odinochku: Optional[bool] = None
+    paroj: Optional[bool] = None
+    kuhnya: Optional[str] = None
+
+class CityRecommendationRequest(BaseModel):
+    user_id: int
+    interests: List[str]
+    visited_cities: List[str]
+    survey: UserSurvey
+    n: int = 5
+
+@router.post("/recommend_cities")
+def recommend_cities_endpoint(request: CityRecommendationRequest):
+    global city_model, city_df, city_dataset, city_user_features, city_item_features
+    with model_lock:
+        if city_model is None:
+            return JSONResponse(status_code=status.HTTP_503_SERVICE_UNAVAILABLE, content={"error": "Model not trained"})
+        try:
+            # Проверка наличия пользователя в модели
+            if str(request.user_id) not in [str(uid) for uid in city_df.index]:
+                return JSONResponse(status_code=404, content={"error": "User not found in recommendation model"})
+            recs = recommend_cities.recommend(request.user_id, city_model, city_df, city_dataset, city_user_features, city_item_features, n=request.n)
+            return {"cities": recs, "message": "OK"}
+        except Exception as e:
+            return JSONResponse(status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, content={"error": str(e)})
 
 

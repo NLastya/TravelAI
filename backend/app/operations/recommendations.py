@@ -18,27 +18,29 @@ def get_recommended_tours(user_id: int, interests: List[str] = None,
         cursor.execute("SELECT city_name FROM visited_cities WHERE user_id = ?", (user_id,))
         visited_cities = [row[0] for row in cursor.fetchall()]
         
-        # Get user survey data
+        # Get user survey data (только существующие поля)
         cursor.execute('''
-        SELECT travel_frequency, preferred_climate, travel_budget
+        SELECT gender, age_group, cities_5, cities_4, cities_3, cities_2, cities_1, izbrannoe, cities_prosmotr_more, cities_prosmotr_less,
+               poznavatelnyj_kulturno_razvlekatelnyj, delovoy, etnicheskiy, religioznyj, sportivnyj, obrazovatelnyj, ekzotic, ekologicheskiy, selskij, lechebno_ozdorovitelnyj,
+               sobytijnyj, gornolyzhnyj, morskie_kruizy, plyazhnyj_otdykh, s_detmi, s_kompaniej_15_24, s_kompaniej_25_44, s_kompaniej_45_66, s_semej, v_odinochku, paroj, kuhnya
         FROM user_surveys
         WHERE user_id = ?
         ''', (user_id,))
         survey_data = cursor.fetchone()
+        # (survey_data не используется далее, но если нужно — используйте только эти поля)
         
         # Build query based on preferences
         query = '''
         SELECT DISTINCT t.tour_id
         FROM tours t
-        LEFT JOIN tour_categories tc ON t.tour_id = tc.tour_id
         WHERE 1=1
         '''
         params = []
         
-        # Filter by interests
+        # Filter by interests (замокать: фильтровать по title если interests заданы)
         if interests:
-            query += " AND tc.category IN ({})".format(','.join(['?'] * len(interests)))
-            params.extend(interests)
+            query += " AND (" + " OR ".join(["t.title LIKE ?" for _ in interests]) + ")"
+            params.extend([f"%{interest}%" for interest in interests])
         
         # Filter by preferred locations
         if preferred_locations:

@@ -1,17 +1,19 @@
 from fastapi import FastAPI, HTTPException, Query
-from typing import List, Optional
+from typing import List, Optional, Union
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from operations.auth import login_user, register_user
 from schemas import models
-from database.database import init_db
+from database.database import init_db, get_connection
 # from operations import register_user, login_user
-from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings
-from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
+from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings, get_user_interests, get_visited_cities
+from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours, generate_tour_docx
 from operations.recommendations import get_recommended_tours, get_fallback_recommendations
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
 from operations.analytics_operations import start_city_view, end_city_view, get_user_city_analytics, get_active_city_views
 from operations.city_operations import add_ready_city, get_ready_city
+from operations.analytics_operations import save_city_view_event
 from parsing import parser
 import requests
 import os
@@ -53,6 +55,7 @@ def generate_tour(request: models.GenerateTourRequest):
     generated_tours = []
     for tour_data in tours_data:
         tour = models.Tour(**tour_data)
+        tour.description = "Увлекательный тур для всей семьи!"
         tour_id = save_tour_to_db(tour)
         tour.tour_id = tour_id
         generated_tours.append(tour)
@@ -69,6 +72,7 @@ def generate_url_tour(request: models.GenerateUrlTourRequest):
         generated_tours = []
         for tour_data in tours_data:
             tour = models.Tour(**tour_data)
+            tour.description = "Увлекательный тур для всей семьи!"
             tour_id = save_tour_to_db(tour, url=request.url)
             tour.tour_id = tour_id
             generated_tours.append(tour)
@@ -78,11 +82,27 @@ def generate_url_tour(request: models.GenerateUrlTourRequest):
         raise HTTPException(status_code=500, detail=str(e))
 
 # Tour retrieval endpoints
-@app.get("/tour/{tour_id}", response_model=models.Tour)
-def tour(tour_id: int, current_user_id: Optional[int] = None):
-    """Get tour by ID"""
+@app.get("/tour/{tour_id}", response_model=Union[models.Tour, List[models.Tour]])
+def tour(tour_id: str, current_user_id: Optional[int] = None):
+    """Get tour by ID or all tours if tour_id == 'all'"""
+    if tour_id == 'all':
+        # Получить все туры из базы
+        from operations.tour_operations import get_popular_tours
+        tours = get_popular_tours()
+        # Check favorite status for the list
+        if current_user_id:
+            favorite_tour_ids = get_user_favorite_tour_ids(current_user_id)
+            for tour_item in tours:
+                if tour_item.tour_id in favorite_tour_ids:
+                    tour_item.is_favorite = True
+        return tours
+    
+    tour_id = int(tour_id)
     cache_key = f"tour:{tour_id}"
-    cached_tour_json = redis_client.get(cache_key)
+    try:
+        cached_tour_json = redis_client.get(cache_key)
+    except Exception:
+        cached_tour_json = None
     
     tour_obj = None
     if cached_tour_json:
@@ -92,7 +112,10 @@ def tour(tour_id: int, current_user_id: Optional[int] = None):
         if not tour_obj:
             raise HTTPException(status_code=404, detail="Tour not found")
         # Cache the original tour object from DB
-        redis_client.set(cache_key, tour_obj.json(), ex=600)
+        try:
+            redis_client.set(cache_key, tour_obj.json(), ex=600)
+        except Exception:
+            pass
 
     # Check favorite status if user is provided, but don't cache this result
     if current_user_id:
@@ -177,22 +200,84 @@ def recommend_tours(request: models.TourRecommendationRequest):
 
 @app.get("/user_recommendations/{user_id}", response_model=models.RecommendationResponse)
 def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
-    """Get personalized tour recommendations for user"""
+    """Get personalized tour recommendations for user via AI_service"""
+    interests = get_user_interests(user_id)
+    visited_cities = get_visited_cities(user_id)
+    survey_result = get_user_survey(user_id)
+    if survey_result["status"] != "success":
+        raise HTTPException(status_code=404, detail="User survey not found")
+    survey = survey_result["data"]
+    ai_url = os.getenv('AI_CITIES_URL', 'http://127.0.0.1:8002/api/v1/recommend_cities')
+    payload = {
+        "user_id": user_id,
+        "interests": interests,
+        "visited_cities": visited_cities,
+        "survey": survey,
+        "n": max_results
+    }
+    response = requests.post(ai_url, json=payload)
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"AI_service error: {response.text}")
     try:
-        # Recommendations are dynamic, so we get them first
-        recommended_tours = get_recommended_tours(user_id, max_results=max_results)
-        if not recommended_tours:
-            recommended_tours = get_fallback_recommendations(max_results)
-        
-        # Check favorite status for recommended tours
-        favorite_tour_ids = get_user_favorite_tour_ids(user_id)
-        for tour_item in recommended_tours:
-            if tour_item.tour_id in favorite_tour_ids:
-                tour_item.is_favorite = True
-
-        return models.RecommendationResponse(tours=recommended_tours, message="OK")
+        result = response.json()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"AI_service returned invalid JSON: {e}")
+    return result
+
+@app.get("/city_recommendations/{user_id}", response_model=models.RecommendationResponse)
+def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
+    """Get tour recommendations based on city recommendations from AI_service"""
+    interests = get_user_interests(user_id)
+    visited_cities = get_visited_cities(user_id)
+    survey_result = get_user_survey(user_id)
+    if survey_result["status"] != "success":
+        raise HTTPException(status_code=404, detail="User survey not found")
+    survey = survey_result["data"]
+    ai_url = os.getenv('AI_CITIES_URL', 'http://127.0.0.1:8002/api/v1/recommend_cities')
+    payload = {
+        "user_id": user_id,
+        "interests": interests,
+        "visited_cities": visited_cities,
+        "survey": survey,
+        "n": max_results
+    }
+    response = requests.post(ai_url, json=payload)
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"AI_service error: {response.text}")
+    try:
+        city_recs = response.json().get("cities", [])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI_service returned invalid JSON: {e}")
+    if not city_recs:
+        return models.RecommendationResponse(tours=[], message="No city recommendations")
+    if not isinstance(city_recs, list):
+        raise HTTPException(status_code=500, detail=f"AI_service returned wrong format: {city_recs}")
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = f"""
+        SELECT tour_id FROM tours
+        WHERE location IN ({','.join(['?']*len(city_recs))})
+        ORDER BY rating DESC, relevance DESC
+        LIMIT ?
+    """
+    params = city_recs + [max_results]
+    try:
+        cursor.execute(query, params)
+        tour_ids = [row[0] for row in cursor.fetchall()]
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"DB error: {e}")
+    conn.close()
+    recommended_tours = []
+    for tour_id in tour_ids:
+        tour = get_tour_by_id(tour_id)
+        if tour:
+            recommended_tours.append(tour)
+    favorite_tour_ids = get_user_favorite_tour_ids(user_id)
+    for tour_item in recommended_tours:
+        if tour_item.tour_id in favorite_tour_ids:
+            tour_item.is_favorite = True
+    return models.RecommendationResponse(tours=recommended_tours, message="OK")
 
 # User preferences endpoints
 @app.post("/user_interests/{user_id}")
@@ -333,3 +418,31 @@ def get_city_endpoint(city_id: int):
     if result["status"] == "error":
         raise HTTPException(status_code=404, detail=result["message"])
     return result["data"]
+
+#ручка для ивента 2 минуты
+@app.post("/analytics/city-view/event", response_model=models.CityViewEventResponse)
+def save_city_view_event_endpoint(event: models.CityViewEventSimple):
+    """Save city view event (user viewed city for more than 2 minutes)"""
+    result = save_city_view_event(event.user_id, event.city_name)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.CityViewEventResponse(**result)
+
+@app.get("/generate_tour_docx/{tour_id}")
+def generate_tour_docx_endpoint(tour_id: int):
+    """Generate a DOCX file for a tour"""
+    try:
+        print(f"Attempting to generate DOCX for tour_id: {tour_id}")
+        docx_data = generate_tour_docx(tour_id)
+        print(f"Successfully generated DOCX for tour_id: {tour_id}")
+        return Response(
+            content=docx_data, 
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename=tour_{tour_id}.docx"}
+        )
+    except ValueError as e:
+        print(f"Tour not found error for tour_id {tour_id}: {str(e)}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        print(f"Error generating DOCX for tour_id {tour_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")

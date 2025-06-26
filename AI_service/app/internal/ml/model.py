@@ -1,10 +1,11 @@
-"""from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification
+from transformers import AutoTokenizer, AutoModelForSeq2SeqLM, AutoModelForCausalLM, AutoModelForTokenClassification
 from transformers import pipeline
 from mistralai import Mistral
 from ollama import chat
 from ollama import ChatResponse
 from openai import OpenAI
 import io
+import app.internal.ml.settings as ml_settings
 
 
 class Model_NER:
@@ -119,6 +120,26 @@ class Model_llama_70B2:
             return chat_completion.choices[0].message.content
 
 
+# --- SHORT DESCRIPTION GENERATION ---
+_short_desc_pipeline = None
+
+def get_short_desc_pipeline():
+    global _short_desc_pipeline
+    if _short_desc_pipeline is None:
+        tokenizer = AutoTokenizer.from_pretrained(ml_settings.model)
+        model = AutoModelForSeq2SeqLM.from_pretrained(ml_settings.model)
+        _short_desc_pipeline = pipeline('text2text-generation', model=model, tokenizer=tokenizer)
+    return _short_desc_pipeline
+
+def generate_short_description(name: str, category: str) -> str:
+    """
+    Генерирует очень короткое описание для места по названию и категории.
+    """
+    prompt = f"Кратко опиши место '{name}' категории '{category}' (1-2 предложения):"
+    pipe = get_short_desc_pipeline()
+    result = pipe(prompt, max_length=30, num_return_sequences=1, do_sample=True)
+    return result[0]['generated_text'].strip()
+
+
 if __name__ == '__main__':
     print(Model_llama_70B2("18kBsYH2IFrKDsA6sAgNRO4TotwkDa4j").generate("Питание"))
-"""
