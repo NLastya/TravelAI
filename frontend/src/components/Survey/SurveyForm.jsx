@@ -18,7 +18,7 @@ const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
             navigate('/user/1')
         }
         else{
-        fetch(`${HOST_URL}/register`,
+        fetch(`/register`,
             {
                 method: 'POST',
                 headers: {

@@ -24,7 +24,7 @@ const Login = (props) => {
         }
             
         e.preventDefault(); 
-        fetch(`${HOST_URL}/login`, {
+        fetch(`/login`, {
             method: 'POST', 
             headers: {
                 'Content-Type': 'application/json', 
