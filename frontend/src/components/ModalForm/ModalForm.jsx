@@ -26,14 +26,17 @@ const dateToBd = (date) => {
 function getRes(data) {
   const dateObj = new Date(data);
 
-    // Получаем день, месяц и год (учитывая, что месяц начинается с 0)
-    const day = String(dateObj.getUTCDate()).padStart(2, "0");
-    const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
-    const year = dateObj.getUTCFullYear();
+  // Получаем день, месяц и год (с учетом, что месяц начинается с 0)
+  const day = String(dateObj.getUTCDate()).padStart(2, "0");
+  const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+  const year = String(dateObj.getUTCFullYear()); // например, "2025"
 
-    // Формируем строку в формате dd:mm:yyyy
-    const formattedDate = `${day}.${month}.${year}`;
-    return formattedDate;
+  // Берем последние 2 символа из года
+  const shortYear = year.slice(-2); // будет "25"
+
+  // Формируем строку в формате dd.mm.yy
+  const formattedDate = `${day}.${month}.${shortYear}`;
+  return formattedDate;
 }
 
 
@@ -54,9 +57,9 @@ const ModalForm = ({setModal, setListTour}) => {
         } else {
           console.log('form:', {})
             fetch(`${HOST_URL}/generate_tour`, {
-                method: 'POST', 
+                method: 'POST',
                 headers: {
-                  'Content-Type': 'application/json', 
+                  'Content-Type': 'application/json',
                   'ngrok-skip-browser-warning': true,
                 },
                 body: JSON.stringify(

@@ -30,11 +30,7 @@ const Registration = (props) => {
                             onChange={(e) => setForm(prev => ({...prev, 1: {...form[1], login: e.target.value}}))}
                             />
                         </label>
-                <label className={style.inputLabel}> Город проживания *
-                                <input className={style.inputText} value={form?.city} placeholder='Москва'
-                                onChange={(e) => setForm(prev => ({...prev, 1: {...form[1], city: e.target.value}}))}
-                                />
-                            </label>
+                
             </div>
             <div className={style.inputContainer}>
             <label className={style.inputLabel}> Пароль
@@ -50,6 +46,11 @@ const Registration = (props) => {
                                 />
                             </label>
             </div>
+            <label className={style.inputLabel}> Город проживания *
+                                <input className={style.inputText} value={form?.city} placeholder='Москва'
+                                onChange={(e) => setForm(prev => ({...prev, 1: {...form[1], city: e.target.value}}))}
+                                />
+                            </label>
             <div className={style.checker}>
                 <input type="checkbox" id="remember" name="remember" />
                     <label htmlFor='remember'>Я согласен с <a className={style.dangerText}>правилами</a> и доступном к <a className={style.dangerText}>персональным данным</a></label>
