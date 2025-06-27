@@ -21,7 +21,7 @@ const SearchPage = (props) => {
     const listToursMap = (props?.listTours).map(item => (<VerticalCard key={item.key} {...item}/>) )
 
     const handleSubmit = () => {
-        fetch(`${HOST_URL}/generate_tour`, {
+        fetch(`/api/generate_tour`, {
             method: 'POST',
             headers: {
               'Content-Type': 'application/json', 

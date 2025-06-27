@@ -9,8 +9,9 @@ import Footer from "../components/Footer/Footer";
 import { HOST_URL } from "../config";
 import PaginationCustom from "../components/pagination/pagination";
 import Loader from '../components/Loader/loader';
+import { getUserFavorites } from "../helpers/fetchRoute";
 
-const PopularTours = (props) => {
+const PopularTours = ({user_id}, ...props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [listTours, setListTour] = useState([
     {
@@ -39,11 +40,10 @@ const PopularTours = (props) => {
     },
   ]);
   const [form, setForm] = useState({ location: "", date: "" });
-
   const [api, contextHolder] = notification.useNotification();
-
+  const [favoriteList, setFavoriteList] = useState([])
   const listToursMap = listTours.map((item) => (
-    <VerticalCard key={item.key} {...item} />
+    <VerticalCard key={item.key} {...item}/>
   ));
 
   const pagination = <PaginationCustom total={listTours.length}/>
@@ -53,7 +53,7 @@ const PopularTours = (props) => {
     console.log('yes')
 
     setTimeout(()=> {setIsLoading(false);}, 1000)
-    fetch(`${HOST_URL}/list_popular`, {
+    fetch(`/api/list_popular`, {
       method: "GET",
       // headers: {
       //   "ngrok-skip-browser-warning": true,
@@ -88,6 +88,7 @@ const PopularTours = (props) => {
         });
       });
     // setIsLoading(false);
+    getUserFavorites(user_id, setFavoriteList)
   }, []);
 
   return (
