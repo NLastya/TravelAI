@@ -118,6 +118,9 @@ class Tour(BaseModel):
     is_favorite: bool = False
     url: str = ""
 
+@router.post("/is_alive")
+def is_alive():
+    return {"is_alive": True}
 
 @router.post("/search_location", response_model=List[Tour])
 def generate(data: GenerateTourRequest):
