@@ -12,9 +12,9 @@ import tempfile
 user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_{os.getpid()}")
 options = ChromeOptions()
 options.add_argument("--incognito")
-options.add_argument(f"--user-data-dir={user_data_dir}")
+options.add_argument(f"--user-data-dir=/tmp/chrome_profile_{os.getpid()}")
 options.page_load_strategy = 'eager'
-options.add_argument("--headless=new")
+options.add_argument("--headless")
 options.add_argument("--no-sandbox")
 options.add_argument("--disable-dev-shm-usage")
 driver = webdriver.Chrome(options=options)
