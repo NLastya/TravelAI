@@ -42,7 +42,7 @@ h3, p {
 .listInfo {
     display: flex;
     flex-direction: column;
-    gap: 16px;
+    gap: 14px;
     flex: 1 0 70%;
 }
 
@@ -51,6 +51,7 @@ h3, p {
     flex-direction: row;
     justify-content: flex-end;
     gap: 15px;
+    margin-top: -40px;
 }
 
 .location {
@@ -58,9 +59,10 @@ h3, p {
     flex-direction: row;
     align-items: center;
     gap: 4px;
-    font-size: 13px;
+    font-size: 16px;
     font-weight: 500;
     color: var(--grey-text);
+    margin-top: -5px;
 }
 
 .infoRow {
@@ -99,8 +101,9 @@ h3, p {
 .dateVisit {
     display: flex;
     flex-direction: column;
-    justify-content: flex-end;
+    /* justify-content: flex-end; */
     text-align: right;
+    margin-top: 14px;
 }
 
 .h3dsic {
@@ -122,4 +125,8 @@ h3, p {
 
 .mapDiv {
     margin-bottom: 64px;
+}
+
+h3 {
+    font-size: 24px;
 }

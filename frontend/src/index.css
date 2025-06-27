@@ -26,6 +26,25 @@
   /* overflow-x: hidden; */
 }
 
+html {
+  scroll-behavior: smooth;
+}
+
+.animate {
+  opacity: 0; /* Начальное значение прозрачности */
+  transform: translateY(20px); /* Немного смещаем элемент вниз */
+  animation: fadeInUp 1s forwards; /* 1 секунда анимации, forwards сохраняет конечное состояние */
+  animation-delay: var(delay, 0s); /* Позволяет задать задержку анимации через CSS-переменную */
+}
+
+/* Ключевые кадры для анимации появления */
+@keyframes fadeInUp {
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
 #root {
   width: 100vw;
   overflow-x: hidden;
@@ -84,6 +103,7 @@ button {
   background-color: #1a1a1a;
   cursor: pointer;
   transition: border-color 0.25s;
+   transition: background-color 0.3s ease;
 }
 button:hover {
   /* border-color: #646cff; */
@@ -131,6 +151,10 @@ button:focus-visible {
   height: 120px;
   border-radius: 10px;
   flex: 1 0 calc(33% - 12px);
+}
+
+.operations-btn:hover {
+  background-color: #259074;
 }
 
 .ant-select, .ant-select-selector {

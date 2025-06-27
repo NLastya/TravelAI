@@ -1,0 +1,167 @@
+.box {
+    position: relative;
+    height: auto;
+  }
+  
+  .rectangle {
+    height: 50px;
+    left: 0;
+    object-fit: cover;
+    position: absolute;
+    top: 0;
+    width: 48px;
+  }
+  
+  .overlapGroup {
+    height: 19px;
+    left: 52px;
+    position: absolute;
+    top: 8px;
+    width: 105px;
+  }
+  
+  .textWrapper {
+    color: #eeeeee;
+    font-family: "Montserrat-SemiBold", Helvetica;
+    font-size: 9.2px;
+    font-weight: 600;
+    left: 0;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 0;
+    width: 105px;
+  }
+  
+  .locationInstance {
+    /* height: 6px !important; */
+    left: 0;
+    position: absolute !important;
+    top: 12px !important;
+    width: 6px !important;
+  }
+  
+  .spanWrapper {
+    color: #112211;
+    font-family: "Montserrat-Medium", Helvetica;
+    font-size: 4.7px;
+    font-weight: 500;
+    left: 7px;
+    letter-spacing: 0;
+    line-height: normal;
+    opacity: 0.75;
+    position: absolute;
+    top: 12px;
+  }
+  
+  .span {
+    color: #112211;
+    font-family: "Montserrat-Medium", Helvetica;
+    font-size: 4.7px;
+    font-weight: 500;
+    letter-spacing: 0;
+  }
+  
+  .description {
+    color: #eeeeee;
+    font-family: "Montserrat-Regular", Helvetica;
+    font-size: 5.5px;
+    font-weight: 400;
+    left: 54px;
+    letter-spacing: 0;
+    line-height: normal;
+    position: absolute;
+    top: 29px;
+  }
+
+  .dayPlaces {
+    margin-bottom: 24px;
+  }
+  
+  .dayTitle {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 12px;
+    padding-bottom: 4px;
+    border-bottom: 1px solid #eee;
+  }
+  
+  .placesList {
+    max-width: 100%;
+    margin: 0 auto;
+    padding: 20px;
+  }
+  
+  .cityContainer {
+    margin-bottom: 40px;
+  }
+  
+  .cityTitle {
+    font-size: 24px;
+    color: #333;
+    margin-bottom: 20px;
+    position: sticky;
+    left: 0;
+    background: #f9f9f9;
+    z-index: 1;
+    padding-bottom: 10px;
+  }
+  
+  .daysContainer {
+    display: flex;
+    gap: 20px;
+    overflow-x: auto;
+    padding-bottom: 20px;
+    scrollbar-width: thin;
+    scrollbar-color: #ddd #f5f5f5;
+  }
+  
+  .daysContainer::-webkit-scrollbar {
+    height: 8px;
+  }
+  
+  .daysContainer::-webkit-scrollbar-track {
+    background: #f5f5f5;
+    border-radius: 4px;
+  }
+  
+  .daysContainer::-webkit-scrollbar-thumb {
+    background: #ddd;
+    border-radius: 4px;
+  }
+  
+  .dayColumn {
+    min-width: 200px;
+    flex: 0 0 auto;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+  }
+
+  .dayPlaces {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+  }
+  
+  .dayTitle {
+    font-size: 16px;
+    color: #444;
+    margin-bottom: 15px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+    position: sticky;
+    top: 0;
+    background: white;
+    z-index: 1;
+  }
+  
+  .placesGrid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 12px;
+    overflow-y: auto;
+    flex-grow: 1;
+    padding-right: 5px;
+  }

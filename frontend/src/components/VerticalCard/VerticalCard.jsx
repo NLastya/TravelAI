@@ -5,7 +5,7 @@ import style from "./card.module.css";
 import { useNavigate } from "react-router-dom";
 import ButtonLike from '../../components/buttonLike';
 
-const VerticalCard = ({ id }, ...props) => {
+const VerticalCard = ({ id , isLiked}, ...props) => {
   const navigate = useNavigate();
   return (
     <div
@@ -18,7 +18,7 @@ const VerticalCard = ({ id }, ...props) => {
           <div className={style.listInfo}>
             <h3>{props?.name ? props?.name : "Сибирь Тур№1"}</h3>
             <p className={style.location}>
-              <imf src="./location.svg" />
+              <img src="icons/location.svg" />
               {props?.location
                 ? props?.location
                 : "Сибирь, ул. Прохорова, 34755"}
@@ -45,7 +45,7 @@ const VerticalCard = ({ id }, ...props) => {
           >
             Посмотреть тур
           </button>
-          <ButtonLike/>
+          <ButtonLike isLiked={isLiked}/>
         </div>
       </div>
     </div>

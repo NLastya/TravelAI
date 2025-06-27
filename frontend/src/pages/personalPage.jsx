@@ -20,7 +20,7 @@ const PersonalPage = ({setListTour}) => {
     <div className={style.main}>
         <div className={style.personalStyle}>
             {/* TODO: безопасные доступы к свойствам пропс props.firstName, props.bg */}
-        <img src='/personal/bg.svg'/>
+        <img className={style.img} src='/personal/bg.svg'/>
         <img src='/personal/avatar.svg'/>
         </div>
 

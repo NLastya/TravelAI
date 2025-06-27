@@ -14,7 +14,7 @@ const Login = (props) => {
     const [isLogged, setIsLogged] = useState(false);
     // const [userId, setUserId] = useState(-1);
     const navigate = useNavigate();
-      const {setUserId} = useAuth();
+      const {setUserId, setUser} = useAuth();
 
     // const {user_id} = useAuth();
 
@@ -48,6 +48,7 @@ const Login = (props) => {
             setIsLogged(true);
             console.log(body);
             setUserId(body?.user_id ?? 1);
+            setUser(body)
             navigate('/popularTours');
         })
         .catch(err => {

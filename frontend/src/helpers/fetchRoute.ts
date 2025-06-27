@@ -186,12 +186,12 @@ export const addFavorite = async (userId, tourId, saveDataState, isError) => {
     const data = await response.json();
     saveDataState(data);
   } catch (error) {
-    isError(error.message);
+    isError = true
     console.error('Error in addFavorite:', error);
   }
 };
 
-export const removeFavorite = async (userId, tourId, saveDataState, isError) => {
+export const removeFavorite = async (userId, tourId, saveDataState,  setIsFavorite) => {
   try {
     const response = await fetch('/api/favorites', {
       method: 'DELETE',
@@ -208,13 +208,13 @@ export const removeFavorite = async (userId, tourId, saveDataState, isError) => 
     
     const data = await response.json();
     saveDataState(data);
+    setIsFavorite(prev => !prev)
   } catch (error) {
-    isError(error.message);
     console.error('Error in removeFavorite:', error);
   }
 };
 
-export const getUserFavorites = async (userId, saveDataState, isError) => {
+export const getUserFavorites = async (userId, saveDataState,  setIsFavorite) => {
   try {
     const response = await fetch(`/api/users/${userId}/favorites`, {
       method: 'GET',
@@ -227,8 +227,8 @@ export const getUserFavorites = async (userId, saveDataState, isError) => {
     
     const data = await response.json();
     saveDataState(data);
+    setIsFavorite(prev => !prev)
   } catch (error) {
-    isError(error.message);
     console.error('Error in getUserFavorites:', error);
   }
 };

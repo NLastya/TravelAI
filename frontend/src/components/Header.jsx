@@ -11,7 +11,7 @@ import {
 import { useAuth } from "../hooks/useAuth";
 
 const Header = (props) => {
-  const { user_id } = useAuth();
+  const { user_id, user } = useAuth();
   const navigate = useNavigate();
 
   return (
@@ -34,7 +34,7 @@ const Header = (props) => {
           /> */}
             <button className={style.userBtn}>
               <img src="/icons/Ellipse 1.svg" alt="user avatar" />
-              <span>{props?.username ? props?.username : "Влад З."}</span>
+              <span>{user?.username ?? user?.name ?? user?.email ?? "Влад З."}</span>
             </button>
           </DropdownTrigger>
           <DropdownMenu aria-label="Profile Actions" variant="flat">
