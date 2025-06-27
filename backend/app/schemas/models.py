@@ -182,3 +182,11 @@ class CityRatingData(BaseModel):
 
 class UserCityRatingsResponse(BaseModel):
     ratings: List[CityRatingData]
+#для последней фигни
+class CityViewEventResponse(BaseModel):
+    status: str
+    message: Optional[str] = None
+
+class CityViewEventSimple(BaseModel):
+    user_id: int
+    city_name: str

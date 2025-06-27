@@ -12,6 +12,7 @@ from operations.recommendations import get_recommended_tours, get_fallback_recom
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
 from operations.analytics_operations import start_city_view, end_city_view, get_user_city_analytics, get_active_city_views
 from operations.city_operations import add_ready_city, get_ready_city
+from operations.analytics_operations import save_city_view_event
 from parsing import parser
 import requests
 import os
@@ -416,3 +417,12 @@ def get_city_endpoint(city_id: int):
     if result["status"] == "error":
         raise HTTPException(status_code=404, detail=result["message"])
     return result["data"]
+
+#ручка для ивента 2 минуты
+@app.post("/analytics/city-view/event", response_model=models.CityViewEventResponse)
+def save_city_view_event_endpoint(event: models.CityViewEventSimple):
+    """Save city view event (user viewed city for more than 2 minutes)"""
+    result = save_city_view_event(event.user_id, event.city_name)
+    if result["status"] == "error":
+        raise HTTPException(status_code=400, detail=result["message"])
+    return models.CityViewEventResponse(**result)
