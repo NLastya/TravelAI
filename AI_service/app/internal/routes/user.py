@@ -18,7 +18,7 @@ import threading
 import requests
 
 router = APIRouter(
-    prefix="/api/v1"
+    prefix=""
 )
 
 load_dotenv()
