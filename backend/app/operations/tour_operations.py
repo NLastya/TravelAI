@@ -164,15 +164,20 @@ def get_tour_by_id(tour_id: int):
             photo_url = place_row[7]
             if not photo_url or photo_url == "https://via.placeholder.com/150":
                 photo_url = get_first_google_image_url(place_row[1])
+            
+            # Handle NULL coordinates
+            mapgeo_x = place_row[8] if place_row[8] is not None else 0.0
+            mapgeo_y = place_row[9] if place_row[9] is not None else 0.0
+            
             places.append(models.Places(
                 id_place=place_row[0],
-                name=place_row[1],
-                location=place_row[2],
-                rating=place_row[3],
-                date=f"{place_row[4]} - {place_row[5]}" if place_row[4] and place_row[5] else str(place_row[4] or place_row[5]),
-                description=place_row[6],
+                name=place_row[1] or "",
+                location=place_row[2] or "",
+                rating=place_row[3] or 0.0,
+                date=f"{place_row[4]} - {place_row[5]}" if place_row[4] and place_row[5] else str(place_row[4] or place_row[5] or ""),
+                description=place_row[6] or "",
                 photo=photo_url,
-                mapgeo=[place_row[8], place_row[9]]
+                mapgeo=[mapgeo_x, mapgeo_y]
             ))
         
         # Get categories
@@ -180,12 +185,12 @@ def get_tour_by_id(tour_id: int):
         
         tour = models.Tour(
             tour_id=tour_id,
-            title=tour_row[0],
+            title=tour_row[0] or "",
             date=[tour_row[1] or '', tour_row[2] or ''],
-            location=tour_row[3],
-            rating=tour_row[4],
-            relevance=tour_row[5],
-            url=tour_row[6],
+            location=tour_row[3] or "",
+            rating=tour_row[4] or 0.0,
+            relevance=tour_row[5] or 0.0,
+            url=tour_row[6] or "",
             places=places,
             categories=categories,
             description="Увлекательный тур для всей семьи!"

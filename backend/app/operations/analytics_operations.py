@@ -29,8 +29,12 @@ def end_city_view(user_id: int, city_name: str) -> Dict:
         if not start_time_str:
             return {"status": "error", "message": "No active view session found"}
         
+        # Handle both bytes and string data from Redis
+        if isinstance(start_time_str, bytes):
+            start_time_str = start_time_str.decode()
+        
         # Calculate view duration
-        start_time = datetime.fromisoformat(start_time_str.decode())
+        start_time = datetime.fromisoformat(start_time_str)
         end_time = datetime.now()
         duration = end_time - start_time
         
@@ -145,7 +149,9 @@ def get_active_city_views(user_id: int) -> List[str]:
         keys = redis_client.keys(pattern)
         cities = []
         for key in keys:
-            city_name = key.decode().split(':')[2]
+            # Handle both bytes and string keys
+            key_str = key.decode() if isinstance(key, bytes) else key
+            city_name = key_str.split(':')[2]
             cities.append(city_name)
         return cities
     except Exception as e:

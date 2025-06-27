@@ -87,12 +87,38 @@ def fetch_places_to_sqlite(city_name: str, db_name: str = "places.db"):
 
         # координаты
         if isinstance(element, overpy.Node):
-            lat = float(element.lat)  # Convert to float
-            lon = float(element.lon)  # Convert to float
+            lat = float(element.lat)
+            lon = float(element.lon)
         else:
             lat, lon = get_centroid_latlon(element)
-            lat = float(lat) if lat is not None else 0.0 # Convert to float
-            lon = float(lon) if lon is not None else 0.0 # Convert to float
+            # Если координаты невалидные, пробуем другие способы
+            if (lat is None or lon is None or (lat == 0.0 and lon == 0.0)):
+                # 1. Пробуем взять координаты первой ноды
+                nodes = getattr(element, 'nodes', [])
+                if nodes:
+                    lat = float(nodes[0].lat)
+                    lon = float(nodes[0].lon)
+                # 2. Пробуем взять center_lat/center_lon
+                if (lat is None or lon is None or (lat == 0.0 and lon == 0.0)):
+                    lat = getattr(element, 'center_lat', 0.0)
+                    lon = getattr(element, 'center_lon', 0.0)
+                    try:
+                        lat = float(lat)
+                        lon = float(lon)
+                    except Exception:
+                        lat, lon = 0.0, 0.0
+                # 3. Пробуем взять из bounds (если есть)
+                if (lat is None or lon is None or (lat == 0.0 and lon == 0.0)) and hasattr(element, 'bounds'):
+                    bounds = getattr(element, 'bounds', None)
+                    if bounds:
+                        lat = float(bounds.get('minlat', 0.0))
+                        lon = float(bounds.get('minlon', 0.0))
+            lat = float(lat) if lat is not None else 0.0
+            lon = float(lon) if lon is not None else 0.0
+
+        # Пропускаем места с невалидными координатами
+        if lat == 0.0 and lon == 0.0:
+            continue
 
         place_info = (
             element.id,

@@ -22,7 +22,7 @@ from database.redis_client import redis_client
 import json
 
 load_dotenv()
-API_URL = os.getenv('API_URL', 'http://localhost/ai/search_location')
+API_URL = os.getenv('API_URL', 'http://localhost:8002/api/v1/search_location')
 
 app = FastAPI()
 
@@ -173,15 +173,19 @@ def remove_tour_from_favorites(request: models.FavoriteRequest):
 @app.get("/users/{user_id}/favorites", response_model=List[models.Tour])
 def get_user_favorite_tours(user_id: int):
     """Get all favorite tours for a user"""
-    cache_key = f"user_favorites:{user_id}"
-    cached_favorites_json = redis_client.get(cache_key)
-    if cached_favorites_json:
-        fav_tours_data = json.loads(cached_favorites_json)
-        return [models.Tour(**data) for data in fav_tours_data]
+    try:
+        cache_key = f"user_favorites:{user_id}"
+        cached_favorites_json = redis_client.get(cache_key)
+        if cached_favorites_json:
+            fav_tours_data = json.loads(cached_favorites_json)
+            return [models.Tour(**data) for data in fav_tours_data]
 
-    favorite_tours = get_user_favorites(user_id)
-    redis_client.set(cache_key, json.dumps([t.dict() for t in favorite_tours]), ex=300)
-    return favorite_tours
+        favorite_tours = get_user_favorites(user_id)
+        redis_client.set(cache_key, json.dumps([t.dict() for t in favorite_tours]), ex=300)
+        return favorite_tours
+    except Exception as e:
+        print(f"Error in get_user_favorite_tours for user {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # Recommendation endpoints
 @app.post("/recommend_tours", response_model=models.RecommendationResponse)
@@ -207,7 +211,7 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/recommend_cities')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,
@@ -233,7 +237,7 @@ def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/recommend_cities')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,
@@ -341,6 +345,16 @@ def test_redis():
     except Exception as e:
         return {"status": "error", "message": str(e)}
 
+@app.delete("/clear-cache/{user_id}")
+def clear_user_cache(user_id: int):
+    """Clear user cache from Redis"""
+    try:
+        redis_client.delete(f"user_survey:{user_id}")
+        return {"status": "success", "message": f"Cache cleared for user {user_id}"}
+    except Exception as e:
+        return {"status": "error", "message": str(e)}
+
+
 # Analytics endpoints
 @app.post("/analytics/city-view/start", response_model=models.CityViewResponse)
 def start_city_view_tracking(event: models.CityViewEvent):
@@ -363,17 +377,29 @@ def end_city_view_tracking(event: models.CityViewEvent):
 @app.get("/analytics/city-view/{user_id}", response_model=models.CityAnalyticsResponse)
 def get_city_analytics(user_id: int):
     """Get user's city view analytics"""
-    result = get_user_city_analytics(user_id)
-    if result["status"] == "error":
-        raise HTTPException(status_code=404, detail=result["message"])
-    return result["data"]
+    try:
+        result = get_user_city_analytics(user_id)
+        if result["status"] == "error":
+            raise HTTPException(status_code=404, detail=result["message"])
+        return result["data"]
+    except HTTPException:
+        raise
+    except Exception as e:
+        print(f"Error in get_city_analytics for user {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 
 @app.get("/analytics/city-view/{user_id}/active", response_model=models.ActiveViewsResponse)
 def get_active_views(user_id: int):
     """Get list of cities currently being viewed by user"""
-    active_cities = get_active_city_views(user_id)
-    return {"active_cities": active_cities}
+    try:
+        active_cities = get_active_city_views(user_id)
+        # Convert list to comma-separated string to match ActiveViewsResponse model
+        active_cities_str = ",".join(active_cities) if active_cities else ""
+        return {"active_cities": active_cities_str}
+    except Exception as e:
+        print(f"Error in get_active_views for user {user_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Internal server error: {str(e)}")
 
 # City rating endpoints
 @app.post("/rate_city", response_model=models.CityRatingResponse)

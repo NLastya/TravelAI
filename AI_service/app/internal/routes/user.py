@@ -18,7 +18,7 @@ import threading
 import requests
 
 router = APIRouter(
-    prefix="/api/v1/"
+    prefix="/api/v1"
 )
 
 load_dotenv()
@@ -108,11 +108,15 @@ class Places(BaseModel):
 class Tour(BaseModel):
     tour_id: int
     title: str
-    date: List[str] 
+    date: List[str]
     location: str
     rating: float
     relevance: float
     places: List[Places] = None
+    categories: List[str] = []
+    description: str = ""
+    is_favorite: bool = False
+    url: str = ""
 
 
 @router.post("/search_location", response_model=List[Tour])
@@ -287,12 +291,16 @@ def generate(data: GenerateTourRequest):
     tours = []
     tour_id = 0
 
-    for day_index in range(total_days):  # Используем total_days вместо фиксированного 5
-        tour_date = (start_date + timedelta(days=day_index)).strftime("%Y-%m-%d")
+    for day_index in range(total_days):
+        tour_date = (start_date + timedelta(days=day_index)).strftime("%d.%m.%y")
         daily_places = filtered_places[day_index * places_per_day:(day_index + 1) * places_per_day]
 
-        if not daily_places:
-            continue
+        # Проставляем дату для каждого места
+        for p in daily_places:
+            p.date = tour_date
+            # Исправляем координаты на float
+            if p.mapgeo:
+                p.mapgeo = [float(p.mapgeo[0]), float(p.mapgeo[1])]
 
         tour = Tour(
             tour_id=tour_id,
@@ -301,7 +309,11 @@ def generate(data: GenerateTourRequest):
             location=city,
             rating=calculate_avg_rating(daily_places),
             relevance=1.0,
-            places=daily_places
+            places=daily_places,
+            categories=[],
+            description="Увлекательный тур для всей семьи!",
+            is_favorite=False,
+            url=""
         )
         tours.append(tour)
         tour_id += 1
