@@ -87,7 +87,6 @@ class Generate(BaseModel):
 
 
 class GenerateTourRequest(BaseModel):
-    user_id: int
     data_start: str
     data_end: str
     location: str

@@ -127,15 +127,63 @@ startCityView(0, 'Париж', new Date().toISOString(),
     allFethces();
 
 
-    return(
-    <>
-    <Header/>
+    return (
+  <>
+    <Header />
     <div className={style.main}>
-            <p>Главная страница</p>
+      <div style={{
+        display: 'flex',
+        minHeight: 'calc(100vh - 160px)',
+        backgroundColor: '#f6f8fa',
+        fontFamily: 'Inter, sans-serif',
+        padding: '60px',
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+          <h1 style={{ fontSize: '48px', marginBottom: '20px' }}>Открой мир с нами</h1>
+          <p style={{ fontSize: '18px', marginBottom: '40px', maxWidth: '500px' }}>
+            Лучшие туристические предложения, составленные нейросетью специально для тебя. Получи персональные рекомендации и выбери тур мечты!
+          </p>
+          <div style={{ display: 'flex', gap: '16px', marginBottom: '24px', flexWrap: 'wrap' }}>
+            <a href="/popularTours" style={{
+              padding: '12px 24px',
+              backgroundColor: '#90d7c6',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              color: '#000',
+              fontWeight: 600
+            }}>Популярные туры</a>
+            <a href="/tours" style={{
+              padding: '12px 24px',
+              backgroundColor: '#90d7c6',
+              borderRadius: '8px',
+              textDecoration: 'none',
+              color: '#000',
+              fontWeight: 600
+            }}>Рекомендации</a>
+          </div>
+          <a href="/auth-in" style={{
+            marginTop: '20px',
+            padding: '14px 28px',
+            backgroundColor: '#0fa47f',
+            color: 'white',
+            borderRadius: '10px',
+            textDecoration: 'none',
+            fontWeight: 'bold',
+            width: 'fit-content'
+          }}>Начать</a>
+        </div>
+        <div style={{
+          flex: 1,
+          borderRadius: '24px',
+          background: `url('/path/to/your/image.png') center/cover no-repeat`
+        }} />
+      </div>
     </div>
-    <Footer/>
-    </>
-)
+    <Footer />
+  </>
+);
+
 }
 
 export default MainPage;
