@@ -22,7 +22,7 @@ from database.redis_client import redis_client
 import json
 
 load_dotenv()
-API_URL = os.getenv('API_URL', 'http://localhost/ai/search_location')
+API_URL = os.getenv('API_URL', 'http://localhost:8002/api/v1/search_location')
 
 app = FastAPI()
 
@@ -211,7 +211,7 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/search_location')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,
@@ -237,7 +237,7 @@ def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/search_location')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,
