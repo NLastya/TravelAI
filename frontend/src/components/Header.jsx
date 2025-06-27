@@ -41,7 +41,7 @@ const Header = (props) => {
             <DropdownItem key="personal" href={`/user/${user_id}`}>
               Личный кабинет
             </DropdownItem>
-            <DropdownItem key="settings">Настройки</DropdownItem>
+            {/* <DropdownItem key="settings">Настройки</DropdownItem> */}
             <DropdownItem key="logout" color="danger" href="/auth-in">
               Выйти
             </DropdownItem>
