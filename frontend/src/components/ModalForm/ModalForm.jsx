@@ -38,7 +38,7 @@ const ModalForm = ({setModal, setListTour}) => {
             setFormError(true);
         } else {
           console.log('form:', {})
-            fetch(`/generate_tour`, {
+            fetch(`/api/generate_tour`, {
                 method: 'POST', 
                 headers: {
                   'Content-Type': 'application/json', 

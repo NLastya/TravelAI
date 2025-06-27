@@ -53,7 +53,7 @@ const FavoriteToursPage = (props) => {
     console.log('yes')
 
     setTimeout(()=> {setIsLoading(false);}, 1000)
-    fetch(`/list_popular`, {
+    fetch(`/api/list_popular`, {
       method: "GET",
       // headers: {
       //   "ngrok-skip-browser-warning": true,

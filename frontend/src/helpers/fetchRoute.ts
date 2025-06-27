@@ -2,7 +2,7 @@ export const getGenerateTours = (
   fetchData = {},
   storeSaveFunc = (data) => {}
 ) => {
-  fetch('/generate_tour', {
+  fetch('/api/generate_tour', {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
@@ -34,7 +34,7 @@ export const getTourById = (
   fetchData = {},
   storeSaveFunc = (data) => {}
 ) => {
-  fetch(`/tour/${tour_id}`)
+  fetch(`/api/tour/${tour_id}`)
     .then((res) => res.json())
     .then((data) => storeSaveFunc(data))
     .catch((e) => {
@@ -43,7 +43,7 @@ export const getTourById = (
 };
 
 export const postUserInterests = (user_id, fetchData={}, storeSaveFunc, setIsSuccessfull) => {
-  fetch('/user_survey/', {
+  fetch('/api/user_survey/', {
     method: 'POST',
     body: JSON.stringify(fetchData),
     headers: {
@@ -63,7 +63,7 @@ export const postUserInterests = (user_id, fetchData={}, storeSaveFunc, setIsSuc
 
 export const getUserSurvey = async (userId, saveDataState, isError) => {
   try {
-    const response = await fetch(`/user_survey/${userId}`, {
+    const response = await fetch(`/api/user_survey/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -82,7 +82,7 @@ export const getUserSurvey = async (userId, saveDataState, isError) => {
 
 export const startCityView = async (userId, cityName, timestamp, saveDataState, isError) => {
   try {
-    const response = await fetch('/analytics/city-view/start', {
+    const response = await fetch('/api/analytics/city-view/start', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -107,7 +107,7 @@ export const startCityView = async (userId, cityName, timestamp, saveDataState, 
 
 export const endCityView = async (userId, cityName, timestamp, saveDataState, isError) => {
   try {
-    const response = await fetch('/analytics/city-view/end', {
+    const response = await fetch('/api/analytics/city-view/end', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -132,7 +132,7 @@ export const endCityView = async (userId, cityName, timestamp, saveDataState, is
 
 export const getCityViewsAnalytics = async (userId, saveDataState, isError) => {
   try {
-    const response = await fetch(`/analytics/city-view/${userId}`, {
+    const response = await fetch(`/api/analytics/city-view/${userId}`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -151,7 +151,7 @@ export const getCityViewsAnalytics = async (userId, saveDataState, isError) => {
 
 export const getActiveCityViews = async (userId, saveDataState, isError) => {
   try {
-    const response = await fetch(`/analytics/city-view/${userId}/active`, {
+    const response = await fetch(`/api/analytics/city-view/${userId}/active`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ export const getActiveCityViews = async (userId, saveDataState, isError) => {
 
 export const addFavorite = async (userId, tourId, saveDataState, isError) => {
   try {
-    const response = await fetch('/favorites', {
+    const response = await fetch('/api/favorites', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -193,7 +193,7 @@ export const addFavorite = async (userId, tourId, saveDataState, isError) => {
 
 export const removeFavorite = async (userId, tourId, saveDataState, isError) => {
   try {
-    const response = await fetch('/favorites', {
+    const response = await fetch('/api/favorites', {
       method: 'DELETE',
       headers: {
         'Content-Type': 'application/json',
@@ -216,7 +216,7 @@ export const removeFavorite = async (userId, tourId, saveDataState, isError) => 
 
 export const getUserFavorites = async (userId, saveDataState, isError) => {
   try {
-    const response = await fetch(`/users/${userId}/favorites`, {
+    const response = await fetch(`/api/users/${userId}/favorites`, {
       method: 'GET',
       headers: {
         'Content-Type': 'application/json',
