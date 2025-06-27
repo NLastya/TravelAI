@@ -12,7 +12,7 @@ import { useAuth } from '../../hooks/useAuth';
 const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
   const navigate = useNavigate();
   const [isSuccessful, setIsSuccessfull] = useState(false);
-  const {setUserId} = useAuth();
+  const {setUserId, setUser} = useAuth();
 
   const postRegistration = (form, setIsSuccessfull) => {
         if(LOCALSTORAGEAUTH){
@@ -36,6 +36,7 @@ const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
         }).then(body => {
           const userId = body?.user_id
           setUserId(userId);
+          setUser(body);
           // setIsSuccessfull(true)
             // setIsLogged(true)
             navigate('/popularTours');

@@ -12,6 +12,9 @@ import Loader from '../components/Loader/loader';
 import { getUserFavorites } from "../helpers/fetchRoute";
 import { useAuth } from "../hooks/useAuth";
 
+
+
+
 const PopularTours = (...props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [listTours, setListTour] = useState([
@@ -44,10 +47,6 @@ const PopularTours = (...props) => {
   const [form, setForm] = useState({ location: "", date: "" });
   const [api, contextHolder] = notification.useNotification();
   const [favoriteList, setFavoriteList] = useState([])
-  const listToursMap = listTours.map((item) => (
-    <VerticalCard key={item.key} {...item}/>
-  ));
-
   const pagination = <PaginationCustom total={listTours.length}/>
 
   useEffect(() => {
@@ -91,6 +90,17 @@ const PopularTours = (...props) => {
     // setIsLoading(false);
     getUserFavorites(user_id, setFavoriteList)
   }, []);
+
+  const sortedIds = favoriteList.map(item => item.id).sort((a, b) => a - b);
+
+const favoriteIds = sortedIds.filter((id, index) => {
+  if (index === 0) return true;
+  return id === sortedIds[index - 1] + 1;
+});
+
+const listToursMap = listTours.map((item) => (
+  <VerticalCard key={item.key} {...item} isLiked={favoriteIds.includes(item?.id ?? 1)}/>
+));
 
   return (
     <>

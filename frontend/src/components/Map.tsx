@@ -979,7 +979,7 @@ const dataRes3 = {
 
 
 
-const CustomMap = ({routeArr, ...props}: {routeArr: any[]}) => {
+const CustomMap = ({routeArr,  ...props}: {routeArr: any[]}) => {
     const [route, setRoute] = useState(dataRes);
 
     const handleRoute = useCallback((route) => {
@@ -988,11 +988,8 @@ const CustomMap = ({routeArr, ...props}: {routeArr: any[]}) => {
         } else {
             setRoute(null);
         }
-
     }, [routeArr]);
-
     useEffect(() => {
-
     }, [])
     
 

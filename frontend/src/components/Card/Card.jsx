@@ -4,7 +4,7 @@ import Pointer from "./image/pointer_2.png"
 import Star from "./image/star_2.png"
 import './card.css'
 
-const Card = (props) {
+const CardCustom2 = (props) {
     return (
         <div>
             <img className="Location_photo" src={Loc_Photo} alt="Location_photo"/>
@@ -52,4 +52,4 @@ const Card = (props) {
     )
 }
 
-export default Card
+export default CardCustom2;

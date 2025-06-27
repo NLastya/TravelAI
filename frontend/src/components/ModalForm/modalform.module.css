@@ -23,8 +23,19 @@
     overflow-x: hidden;
     overflow-y: hidden;
     top: 0;
-    
-}
+    opacity: 0;
+    animation: fadeInUp 1s forwards;
+    animation-delay: var(delay, 0s);
+  }
+  
+  @keyframes fadeInUp {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
 
 .inputLabel {
     font-size: 14px;
@@ -51,4 +62,9 @@
     flex-direction: row;
     justify-content: space-between;
     align-items: center;
+}
+
+.closeBtn {
+    width: 12px;
+    height: 12px;
 }

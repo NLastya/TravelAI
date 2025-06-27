@@ -3,7 +3,7 @@ import style from './footer.module.css';
 const Footer = () => {
     return (
         <div className={style.footer}>
-            <img src='/icons/logo.svg' alt='svg'/>
+            <img src='/icons/logo-w.svg' alt='svg'/>
             <p>Наш блог</p>
             <p>О нас</p>
             <p>Нейросеть</p>

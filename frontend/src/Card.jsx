@@ -4,7 +4,7 @@ import Pointer from "./image/pointer_2.png"
 import Star from "./image/star_2.png"
 import './card.css'
 
-function Card({date, title, location, description, }) {
+function CardCustom({date, title, location, description, }) {
     return (
         <div>
             <img className="Location_photo" src={Loc_Photo} alt="Location_photo"/>
@@ -35,7 +35,7 @@ function Card({date, title, location, description, }) {
 
                 <div className="Date">
                     <p className="Date_text">Даты вылета</p>
-                    <p className="Date_days">{(String(date.start) + ' - ' + String(date?.end)) ?? '24.12 - 7.01'}</p>
+                    <p className="Date_days">{(String(date?.start_date) + ' - ' + String(date?.end_date))}</p>
                     <p className="Date_count">{'5 дней, заглушка'}</p>
                     <p className="Date_text">дней</p>
 
@@ -52,4 +52,4 @@ function Card({date, title, location, description, }) {
     )
 }
 
-export default Card
+export default CardCustom;

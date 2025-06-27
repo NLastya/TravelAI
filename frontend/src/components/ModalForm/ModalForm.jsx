@@ -82,10 +82,10 @@ const ModalForm = ({setModal, setListTour}) => {
 
     return(
     <>
-        <div className={style.modal}>
+        <div className={style.modal + ' animate'}>
             <div className={style.modalHeader}><h3>Выберите город и даты</h3><button
               onClick={() => {setModal(false)}}
-            ><img src="" alt="close"/></button></div>
+            ><img className={style.closeBtn} src="/icons/close.svg" alt="close"/></button></div>
             <label className={style.inputLabel}> Даты отправки и прибытия
                 {/* <input className={style.inputText} value={form?.date}
                 onChange={(e) => setForm(prev => ({...prev, date: e.target.value}))}
