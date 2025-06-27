@@ -1,13 +1,14 @@
 from fastapi import FastAPI, HTTPException, Query
 from typing import List, Optional, Union
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import Response
 
 from operations.auth import login_user, register_user
 from schemas import models
 from database.database import init_db, get_connection
 # from operations import register_user, login_user
 from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings, get_user_interests, get_visited_cities
-from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
+from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours, generate_tour_docx
 from operations.recommendations import get_recommended_tours, get_fallback_recommendations
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
 from operations.analytics_operations import start_city_view, end_city_view, get_user_city_analytics, get_active_city_views
@@ -426,3 +427,22 @@ def save_city_view_event_endpoint(event: models.CityViewEventSimple):
     if result["status"] == "error":
         raise HTTPException(status_code=400, detail=result["message"])
     return models.CityViewEventResponse(**result)
+
+@app.get("/generate_tour_docx/{tour_id}")
+def generate_tour_docx_endpoint(tour_id: int):
+    """Generate a DOCX file for a tour"""
+    try:
+        print(f"Attempting to generate DOCX for tour_id: {tour_id}")
+        docx_data = generate_tour_docx(tour_id)
+        print(f"Successfully generated DOCX for tour_id: {tour_id}")
+        return Response(
+            content=docx_data, 
+            media_type="application/vnd.openxmlformats-officedocument.wordprocessingml.document",
+            headers={"Content-Disposition": f"attachment; filename=tour_{tour_id}.docx"}
+        )
+    except ValueError as e:
+        print(f"Tour not found error for tour_id {tour_id}: {str(e)}")
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        print(f"Error generating DOCX for tour_id {tour_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Error generating DOCX: {str(e)}")
