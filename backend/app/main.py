@@ -22,7 +22,7 @@ from database.redis_client import redis_client
 import json
 
 load_dotenv()
-API_URL = os.getenv('API_URL', 'http://localhost/ai/search_location')
+API_URL = os.getenv('API_URL', 'http://localhost:8002/api/v1/search_location')
 
 app = FastAPI()
 
@@ -44,7 +44,7 @@ async def startup_event():
 @app.post("/generate_tour", response_model=List[models.Tour])
 def generate_tour(request: models.GenerateTourRequest):
     """Generate tours based on user request"""
-
+    print(request)
     response = requests.post(API_URL, json=request.dict())
     if response.status_code != 200:
         raise HTTPException(status_code=500, detail="Failed to generate tours")
@@ -216,7 +216,7 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/search_location')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,
@@ -242,7 +242,7 @@ def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
     if survey_result["status"] != "success":
         raise HTTPException(status_code=404, detail="User survey not found")
     survey = survey_result["data"]
-    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost/ai/search_location')
+    ai_url = os.getenv('AI_CITIES_URL', 'http://localhost:8002/api/v1/search_location')
     payload = {
         "user_id": user_id,
         "interests": interests,

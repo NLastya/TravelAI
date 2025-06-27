@@ -44,7 +44,7 @@ class GenerateTourRequest(BaseModel):
     data_start: str
     data_end: str
     location: str
-    hobby: List[str]
+    hobbies: list
 
 class GenerateUrlTourRequest(BaseModel):
     url: str
