@@ -235,24 +235,24 @@ def generate(data: GenerateTourRequest):
     filtered_places = []
 
     def get_wikimedia_image_url(place_name):
-        url = "https://en.wikipedia.org/w/api.php"
-        params = {
-            "action": "query",
-            "format": "json",
-            "prop": "pageimages",
-            "titles": place_name,
-            "pithumbsize": 400
-        }
-        try:
-            response = requests.get(url, params=params, timeout=2)
-            data = response.json()
-            pages = data.get("query", {}).get("pages", {})
-            for page in pages.values():
-                if "thumbnail" in page:
-                    return page["thumbnail"]["source"]
-        except Exception as e:
-            print("Wiki image error:", e)
-        return "https://via.placeholder.com/150"
+        # url = "https://en.wikipedia.org/w/api.php"
+        # params = {
+        #     "action": "query",
+        #     "format": "json",
+        #     "prop": "pageimages",
+        #     "titles": place_name,
+        #     "pithumbsize": 400
+        # }
+        # try:
+        #     response = requests.get(url, params=params, timeout=2)
+        #     data = response.json()
+        #     pages = data.get("query", {}).get("pages", {})
+        #     for page in pages.values():
+        #         if "thumbnail" in page:
+        #             return page["thumbnail"]["source"]
+        # except Exception as e:
+        #     print("Wiki image error:", e)
+        return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGKPdm1NTslz32yLdZKLBH41Pu4fPBu7ggAQ&s"
 
     for (id_, name, category, rating, hours, lat, lon) in rows:
         '''if not match_weather(category):
