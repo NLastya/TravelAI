@@ -41,7 +41,6 @@ class Tour(BaseModel):
     is_favorite: Optional[bool] = False
 
 class GenerateTourRequest(BaseModel):
-    user_id: int
     data_start: str
     data_end: str
     location: str
@@ -173,9 +172,7 @@ class CityAnalytics(BaseModel):
     last_viewed: Optional[str] = None
 
 class CityAnalyticsResponse(BaseModel):
-    cities_prosmotr_more: List[str]
-    cities_prosmotr_less: List[str]
-    total_cities_viewed: int
+    analytics: List[CityAnalytics]
 
 class ActiveViewsResponse(BaseModel):
     active_cities: str

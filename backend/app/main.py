@@ -132,6 +132,11 @@ def list_popular(current_user_id: Optional[int] = None):
     cached_tours_json = redis_client.get(cache_key)
 
     tours = []
+
+    """tours = get_popular_tours()
+        # Cache the list of original tour objects
+    redis_client.set(cache_key, json.dumps([t.dict() for t in tours]), ex=600)
+    """
     if cached_tours_json:
         tours_data = json.loads(cached_tours_json)
         tours = [models.Tour(**data) for data in tours_data]
