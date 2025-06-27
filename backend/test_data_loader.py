@@ -347,7 +347,7 @@ def main():
     # Проверяем доступность сервера
     result = make_request("GET", "/tests")
     if result["status"] != "success":
-        print("❌ Сервер недоступен. Убедитесь, что FastAPI сервер запущен на http://127.0.0.1:5173")
+        print("❌ Сервер недоступен. Убедитесь, что FastAPI сервер запущен на http://127.0.0.1:8000")
         return
     
     print("✅ Сервер доступен")
