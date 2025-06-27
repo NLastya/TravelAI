@@ -4,9 +4,9 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from operations.auth import login_user, register_user
 from schemas import models
-from database.database import init_db
+from database.database import init_db, get_connection
 # from operations import register_user, login_user
-from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings
+from operations.user_operations import save_user_interests, save_user_survey, get_user_survey, update_city_rating, get_city_rating, get_user_city_ratings, get_user_interests, get_visited_cities
 from operations.tour_operations import save_tour_to_db, get_tour_by_id, get_popular_tours
 from operations.recommendations import get_recommended_tours, get_fallback_recommendations
 from operations.favorite_operations import add_favorite, remove_favorite, get_user_favorites, get_user_favorite_tour_ids
@@ -204,16 +204,69 @@ def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20))
         recommended_tours = get_recommended_tours(user_id, max_results=max_results)
         if not recommended_tours:
             recommended_tours = get_fallback_recommendations(max_results)
-        
         # Check favorite status for recommended tours
         favorite_tour_ids = get_user_favorite_tour_ids(user_id)
         for tour_item in recommended_tours:
             if tour_item.tour_id in favorite_tour_ids:
                 tour_item.is_favorite = True
-
         return models.RecommendationResponse(tours=recommended_tours, message="OK")
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+
+@app.get("/city_recommendations/{user_id}", response_model=models.RecommendationResponse)
+def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
+    """Get tour recommendations based on city recommendations from AI_service"""
+    interests = get_user_interests(user_id)
+    visited_cities = get_visited_cities(user_id)
+    survey_result = get_user_survey(user_id)
+    if survey_result["status"] != "success":
+        raise HTTPException(status_code=404, detail="User survey not found")
+    survey = survey_result["data"]
+    ai_url = os.getenv('AI_CITIES_URL', 'http://127.0.0.1:8002/api/v1/recommend_cities')
+    payload = {
+        "user_id": user_id,
+        "interests": interests,
+        "visited_cities": visited_cities,
+        "survey": survey,
+        "n": max_results
+    }
+    response = requests.post(ai_url, json=payload)
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"AI_service error: {response.text}")
+    try:
+        city_recs = response.json().get("cities", [])
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"AI_service returned invalid JSON: {e}")
+    if not city_recs:
+        return models.RecommendationResponse(tours=[], message="No city recommendations")
+    if not isinstance(city_recs, list):
+        raise HTTPException(status_code=500, detail=f"AI_service returned wrong format: {city_recs}")
+    conn = get_connection()
+    cursor = conn.cursor()
+    query = f"""
+        SELECT tour_id FROM tours
+        WHERE location IN ({','.join(['?']*len(city_recs))})
+        ORDER BY rating DESC, relevance DESC
+        LIMIT ?
+    """
+    params = city_recs + [max_results]
+    try:
+        cursor.execute(query, params)
+        tour_ids = [row[0] for row in cursor.fetchall()]
+    except Exception as e:
+        conn.close()
+        raise HTTPException(status_code=500, detail=f"DB error: {e}")
+    conn.close()
+    recommended_tours = []
+    for tour_id in tour_ids:
+        tour = get_tour_by_id(tour_id)
+        if tour:
+            recommended_tours.append(tour)
+    favorite_tour_ids = get_user_favorite_tour_ids(user_id)
+    for tour_item in recommended_tours:
+        if tour_item.tour_id in favorite_tour_ids:
+            tour_item.is_favorite = True
+    return models.RecommendationResponse(tours=recommended_tours, message="OK")
 
 # User preferences endpoints
 @app.post("/user_interests/{user_id}")

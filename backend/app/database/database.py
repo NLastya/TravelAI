@@ -124,5 +124,23 @@ def init_db():
     )
     ''')
     
+    # Create user_interests table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS user_interests (
+        user_id INTEGER,
+        interest TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
+    # Create visited_cities table
+    cursor.execute('''
+    CREATE TABLE IF NOT EXISTS visited_cities (
+        user_id INTEGER,
+        city_name TEXT,
+        FOREIGN KEY (user_id) REFERENCES users(user_id)
+    )
+    ''')
+    
     conn.commit()
     conn.close() 
