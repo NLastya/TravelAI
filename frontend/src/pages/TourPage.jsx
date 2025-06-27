@@ -107,12 +107,18 @@ const TourPage = (props) => {
 
   let dateDiff = ''
   if (dataTour.length > 1)
-      dateDiff = new Date(dataTour.date[1] - dataTour.date[0]) 
+      dateDiff = new Date(dataTour.date[1] - dataTour.date[0])
 
   // TODO: перенести на rtk - query
   useEffect(() => {
-    getTourById(tour_id, setDataTour);
+    getTourById(tour_id, (d) => {
+      const arrGeo = (data?.places ?? []).map(place => place?.mapgeo);
+      // console.log('geoL:', arrGeo);
+      setDataTour({...d, geomap: arrGeo})
+    });
   }, []);
+
+  const arrGeo = [[23, 34], [23, 45], [34, 45], [43, 45], [342, 343]]
 
   const [location, setLocation] = useState({
     zoom: 10,
@@ -181,12 +187,12 @@ const TourPage = (props) => {
         </div>
         <div className={style.map}>
           <div className={style.s}>
-            <h3>Маршрут</h3>
+            <h3>Местоположение</h3>
             <button onClick={() => {window.location.href = "https://yandex.ru/maps/213/moscow/?ll=37.740444%2C55.651073&z=10";}}>Посмортеть на Яндекс Карте</button>
           </div>
         </div>
         <div className={style.mapDiv}>
-        <CustomMap routeArr={dataTour?.geomap ?? routeArr} points={dataTour?.geomap}/>
+        <CustomMap routeArr={dataTour?.geomap ?? arrGeo}/>
         </div>
       </div>
       <Footer />

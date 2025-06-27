@@ -47,6 +47,7 @@ const ModalForm = ({setModal, setListTour}) => {
     const [formError, setFormError] = useState(false);
     const [api, contextHolder] = notification.useNotification();
     const {user_id} = useAuth();
+    const navigate = useNavigate();
 
     const handleChange = (value) => {setForm(prev => ({...prev, hobbies: [value]}))}
 
@@ -94,7 +95,6 @@ const ModalForm = ({setModal, setListTour}) => {
                   placement: 'bottomRight',
                 });
               });
-
         }
     }
 
@@ -127,7 +127,7 @@ const ModalForm = ({setModal, setListTour}) => {
 
             <h3 className={style.inputLabel}>Предпочтения</h3>
 
-             <Select 
+             <Select
             //  mode='tags'
               mode="tags"
               style={{ width: '100%' }}
@@ -138,7 +138,11 @@ const ModalForm = ({setModal, setListTour}) => {
              />
             </label>
             {formError && <span style={{color: 'red', fontSize: '12px'}}>Заполните все поля</span>}
-            <button className='mint-btn' onClick={() => sendForm()}>Сгенерировать</button>
+            <button className='mint-btn' onClick={() => {
+              sendForm()
+              navigate('/listTours')
+
+            }}>Сгенерировать</button>
         </div>
         <div className={style.overlay} onClick={() => setModal(false)}></div>
         </>
