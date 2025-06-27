@@ -260,13 +260,20 @@ def generate(data: GenerateTourRequest):
         if not match_hobby(category):
             continue'''
 
+        # Генерация короткого описания
+        try:
+            short_desc = llm.generate_short_description(name, category)
+        except Exception as e:
+            print(f"Short description generation error: {e}")
+            short_desc = category
+
         place = Places(
             id_place=id_,
             name=name,
             location=city,
             rating=rating,
             date=today,
-            description=category,
+            description=short_desc,
             photo=get_wikimedia_image_url(name),
             mapgeo=[lat, lon]
         )

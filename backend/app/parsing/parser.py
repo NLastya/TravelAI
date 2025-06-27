@@ -5,8 +5,14 @@ import bs4
 import requests
 import re
 import time
+import os
+import tempfile
 
+
+user_data_dir = os.path.join(tempfile.gettempdir(), f"chrome_{os.getpid()}")
 options = ChromeOptions()
+options.add_argument("--incognito")
+options.add_argument(f"--user-data-dir={user_data_dir}")
 options.page_load_strategy = 'eager'
 options.add_argument("--headless=new")
 options.add_argument("--no-sandbox")
