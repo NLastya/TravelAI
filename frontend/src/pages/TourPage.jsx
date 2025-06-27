@@ -102,7 +102,7 @@ const mockTour =
 
 const TourPage = (props) => {
   const { tour_id } = useParams();
-  const {user_id} = useAuth();
+  const {user_id, listFavorites} = useAuth();
   const [dataTour, setDataTour] = useState(mockTour);
 
   let dateDiff = ''
@@ -151,7 +151,7 @@ const TourPage = (props) => {
                   {dataTour?.date ? dataTour?.date[0] + ' - ' + dataTour?.date[1] : "26.01.25 - 30.01.25"}
                 </p>
                 <p>{(dateDiff ? dateDiff + getDateText(dateDiff) : '') ?? '5 дней'}</p>
-                <p> <ButtonLike isLiked={props?.isLiked ?? false} user_id={user_id} tour_id={tour_id}/>
+                <p> <ButtonLike isLiked={(listFavorites?? []).includes(tour_id) ?? false} user_id={user_id} tour_id={tour_id}/>
                 <button className={style.btnLeft + "mint-btn"}>Посмотреть тур</button></p>
               </div>
             </div>

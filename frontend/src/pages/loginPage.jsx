@@ -31,7 +31,7 @@ const Login = (props) => {
         else{
             
         e.preventDefault(); 
-        fetch(`/api/login`, {
+        fetch(`${HOST_URL}/login`, {
             method: 'POST', 
             headers: {
                 'Content-Type': 'application/json', 

@@ -43,7 +43,7 @@ const PopularTours = (...props) => {
       location: "Сибирь",
     },
   ]);
-  const {user_id} = useAuth();
+  const {user_id, setFavorites} = useAuth();
   const [form, setForm] = useState({ location: "", date: "" });
   const [api, contextHolder] = notification.useNotification();
   const [favoriteList, setFavoriteList] = useState([])
@@ -53,7 +53,7 @@ const PopularTours = (...props) => {
     setIsLoading(true);
 
     setTimeout(()=> {setIsLoading(false);}, 1000)
-    fetch(`/api/list_popular`, {
+    fetch(`${HOST_URL}/list_popular`, {
       method: "GET",
       // headers: {
       //   "ngrok-skip-browser-warning": true,
@@ -88,7 +88,13 @@ const PopularTours = (...props) => {
         });
       });
     // setIsLoading(false);
-    getUserFavorites(user_id, setFavoriteList)
+    getUserFavorites(user_id, setFavorites)
+    const sortedIds = favoriteList.map(item => item.id).sort((a, b) => a - b);
+    const favoriteIds = sortedIds.filter((id, index) => {
+      if (index === 0) return true;
+      return id === sortedIds[index - 1] + 1;
+    });
+  setFavorites(favoriteIds)
   }, []);
 
   const sortedIds = favoriteList.map(item => item.id).sort((a, b) => a - b);

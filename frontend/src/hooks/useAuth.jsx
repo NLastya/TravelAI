@@ -7,6 +7,8 @@ const initAuthContext = {
   user: {},
   login: () => {},
   logout: () => {},
+  listFavorites: [],
+  setFavorites: () => {},
 };
 
 export const AuthContext = createContext(initAuthContext);
@@ -16,6 +18,7 @@ export const AuthProvider = ({ children }) => {
   const [isLogged, setIsLogged] = useState(false);
   const [user_id, setUserId] = useState(-1);
   const [user, setUser] = useState();
+  const [listFavorites, setFavorites] = useState()
 
   const login = () => {
     setIsLogged(true);
@@ -26,7 +29,7 @@ export const AuthProvider = ({ children }) => {
   };
 
   return (
-    <AuthContext.Provider value={{ isLogged, login, logout, user_id, setUserId, user, setUser 
+    <AuthContext.Provider value={{ isLogged, login, logout, user_id, setUserId, user, setUser, setFavorites,  listFavorites
       
     }}>
       {children}
