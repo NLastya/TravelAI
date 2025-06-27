@@ -91,9 +91,10 @@ const mockTour =
       ]
     }
   ],
-  "categories": [],
+  "categories": ['Еда'],
   "description": "Увлекательный тур для всей семьи!",
-  "is_favorite": false
+  "is_favorite": false, 
+  
 }
 
 
@@ -130,29 +131,31 @@ const TourPage = (props) => {
             <div className={style.bothInfo}>
               <div className={style.listInfo}>
                 <div className={style.innerRatingRow}>
-                <h3>{props?.name ? dataTour?.tour : "Сибирь Тур№1"}</h3>
+                <h3>{dataTour?.name ? dataTour?.tour : "Сибирь Тур№1"}</h3>
                 <Rate value={dataTour?.rating}></Rate> {(dataTour?.rate ? dataTour?.rate + getTourText(dataTour.rate) : '') ?? "5 звезд"}              
                 <div className={style.infoRow}>
               </div>
                 </div>
                 <p className={style.location}>
                   <img src="/icons/location.svg" />
-                  <span>{ "Сибирь, ул. Прохорова, 34755"}</span>
+                  <span className={style.span}>{ "Сибирь, ул. Прохорова, 34755"}</span>
                 </p>
                 <RatingCard rating={dataTour?.rating ?? '4.2'}/>
               </div>
 
               <div className={style.dateVisit}>
                 <p>Даты посещения</p>
-                <p className={style.date}>cl
-                  {dataTour?.date ? dataTour?.date : "26.01.25 - 30.01.25"}
+                <p className={style.date}>
+                  {dataTour?.date ? dataTour?.date[0] + ' - ' + dataTour?.date[1] : "26.01.25 - 30.01.25"}
                 </p>
                 <p>{(dateDiff ? dateDiff + getDateText(dateDiff) : '') ?? '5 дней'}</p>
+                <p> <ButtonLike/>
+                <button className={style.btnLeft + "mint-btn"}>Посмотреть тур</button></p>
               </div>
             </div>
             <div className={style.buttons}>
-             <ButtonLike/>
-              <button className={"mint-btn"}>Посмотреть тур</button>
+             {/* <ButtonLike/>
+              <button className={"mint-btn"}>Посмотреть тур</button> */}
             </div>
           </div>
         </div>
@@ -165,13 +168,13 @@ const TourPage = (props) => {
         <div className={style.disc}>
           <h3 className={style.h3dsic}>Описание</h3>
           <p>
-            {props?.description
-              ? props?.description
+            {dataTour?.description
+              ? dataTour?.description
               : "Насыщенный впечатлениями маршрут сразу по трем Сибирским регионам! Вас ждут уникальные музеи Хакасии с гастрономией региона, сибирская деревня \
                  – Шушенское, буддийские артефакты Тувы, мировое достояние – золото Скифов и музыка хоомей."}
           </p>
           <div className={style.cards}>
-            {(props?.categories ?? []).map((id, item)=> <CardTour title={item} key={id}/>)}
+            {(dataTour?.categories ?? []).map((item, id)=> <CardTour title={item} key={id}/>)}
           </div>
         </div>
         <div className={style.map}>

@@ -134,13 +134,13 @@ button:focus-visible {
   padding: 14px 14px;
 }
 
-.mint-button:hover {
+.mint-btn:hover {
   background-color: var(--mint-color-secondary);
 }
 
 .btn-like {
   border: 1px solid var(--mint-color);
-  padding: 14px 14px;
+  padding: 14px 14px 12px 14px;
   /* width: 41px; */
   border-radius: 4px;
 }
@@ -205,4 +205,9 @@ button:focus-visible {
 /* Reting Antd */
 :where(.css-dev-only-do-not-override-1wwf28x).ant-rate .ant-rate-star:not(:last-child) {
   margin-right: 0px;
+}
+
+.w-full.relative.flex.flex-col.gap-1.p-1.overflow-clip {
+  background-color: white;
+  border-radius: 10px;
 }

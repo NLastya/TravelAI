@@ -13,10 +13,10 @@ const VCard = ({item}, ...props) => {
                               <img src="/icons/location.svg" />
                               <span>{ "Сибирь, ул. Прохорова, 34755"}</span>
                             </p>
+                  <span className={styles.description}>{item?.description ?? 'Красиове место для отыха всей семьей'}</span>
           </div>
           <div className={styles.footer}>
             <button className={styles.btn + " mint-btn"}>Посмотреть место</button>
-            <span className={styles.description}>{item?.description ?? 'Красиове место для отыха всей семьей'}</span>
           </div>
         </div>
         </div>);};

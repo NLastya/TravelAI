@@ -15,12 +15,12 @@
 }
 
 .img {
-    height: 200px;
+    /* height: 200px; */
 }
 
 .personalStyle > img:first-child {
     width: 100%;
-    height: 100px;
+    /* height: 100px; */
 }
 
 .personalStyle > img:nth-child(2) {

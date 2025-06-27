@@ -36,14 +36,15 @@ h3, p {
 .bothInfo {
     display: flex;
     flex-direction: row;
-    justify-content: space-between;
+    /* justify-content: space-between; */
+    gap: 100px;
 }
 
 .listInfo {
     display: flex;
     flex-direction: column;
     gap: 14px;
-    flex: 1 0 70%;
+    /* flex: 1 0 70%; */
 }
 
 .buttons {
@@ -63,6 +64,16 @@ h3, p {
     font-weight: 500;
     color: var(--grey-text);
     margin-top: -5px;
+    color: #121;
+    margin-left: -5px;
+}
+
+.span {
+    font-size: 14px;
+font-style: normal;
+font-weight: 500;
+line-height: normal;
+opacity: 0.75;
 }
 
 .infoRow {
@@ -75,8 +86,9 @@ h3, p {
 
 .date {
     color: #FF8682;
-    font-size: 30px;
+    font-size: 22px;
     font-weight: 600;
+
 }
 
 .cards {
@@ -102,19 +114,16 @@ h3, p {
     display: flex;
     flex-direction: column;
     /* justify-content: flex-end; */
-    text-align: right;
+    text-align: left;
     margin-top: 14px;
 }
-
 .h3dsic {
     display: inline-block;
     margin-bottom: 16px;
 }
-
 .map {
     margin-top: 64px;
 }
-
 .s {
     display: flex;
     flex-direction: row;
@@ -122,11 +131,16 @@ h3, p {
     align-items: center;
     margin-bottom: 16px;
 }
-
 .mapDiv {
     margin-bottom: 64px;
 }
 
 h3 {
     font-size: 24px;
+}
+
+.btnLeft {
+    margin-right: 10px;
+    font-size: 16px;
+    background-color: var(--mint-color);
 }

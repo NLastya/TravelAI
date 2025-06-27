@@ -107,7 +107,7 @@ const ModalForm = ({setModal, setListTour}) => {
                 onChange={(e) => setForm(prev => ({...prev, location: e.target.value}))}
                 />
 
-            <h3>Предпочтения</h3>
+            <h3 className={style.inputLabel}>Предпочтения</h3>
 
              <Select 
             //  mode='tags'
