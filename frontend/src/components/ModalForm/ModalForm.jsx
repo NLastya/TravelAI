@@ -10,6 +10,7 @@ import dayjs from "dayjs";
 import {disabled7DaysDate} from '../dataPicker/datePicker';
 const { RangePicker } = DatePicker;
 import {options} from '../../consts';
+import { useAuth } from "../../hooks/useAuth";
 
 
 const dateToBd = (date) => {
@@ -29,6 +30,7 @@ const ModalForm = ({setModal, setListTour}) => {
     const [form, setForm] = useState({location: '', data_start: new Date(), data_end: new Date(end_date) , hobbies: []});
     const [formError, setFormError] = useState(false);
     const [api, contextHolder] = notification.useNotification();
+    const {user_id} = useAuth();
 
     const handleChange = (value) => {setForm(prev => ({...prev, hobbies: [value]}))}
 
@@ -47,17 +49,17 @@ const ModalForm = ({setModal, setListTour}) => {
                 body: JSON.stringify(
                   // eslint-disable-next-line no-constant-binary-expression
                   {...form, 
-                    data_start: typeof(data_start) === 'Date' ? dateToBd(form?.date_start) : form?.data_start,
-                    data_end: typeof(data_end) === 'Date' ? dateToBd(form?.date_end) : form?.data_end,
+                    data_start: Object.prototype.toString.call(form?.data_start) === "[object Date]"  ? dateToBd(form?.date_start) : form?.data_start,
+                    data_end: Object.prototype.toString.call(form?.data_end) === "[object Date]"  ? dateToBd(form?.date_end) : form?.data_end,
                     }
-
-                  ?? { 
-                  user_id: 2,
-                  data_start: '26.01.25',
-                  data_end: '30.01.25',
-                  location: 'Москва',
-                  hobby: ['музеи искусства', 'спортзал'],
-                }),
+                //   ?? { 
+                //   user_id: 2,
+                //   data_start: '26.01.25',
+                //   data_end: '30.01.25',
+                //   location: 'Москва',
+                //   hobby: ['музеи искусства', 'спортзал'],
+                // }
+              ),
               })
               .then(res => {
                 if (!res.ok) {

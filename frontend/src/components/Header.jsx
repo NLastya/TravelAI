@@ -8,9 +8,10 @@ import {
   DropdownMenu,
   DropdownTrigger,
 } from "@heroui/react";
+import { useAuth } from "../hooks/useAuth";
 
 const Header = (props) => {
-  const { user_id } = useParams();
+  const { user_id } = useAuth();
   const navigate = useNavigate();
 
   return (
