@@ -4,9 +4,11 @@ import { Rate } from "antd";
 import style from "./card.module.css";
 import { useNavigate } from "react-router-dom";
 import ButtonLike from '../../components/buttonLike';
+import {useAuth} from '../../hooks/useAuth';
 
 const VerticalCard = ({ id , isLiked}, ...props) => {
   const navigate = useNavigate();
+  const {user_id} = useAuth();
   return (
     <div
       className={style.card}
@@ -45,7 +47,7 @@ const VerticalCard = ({ id , isLiked}, ...props) => {
           >
             Посмотреть тур
           </button>
-          <ButtonLike isLiked={isLiked}/>
+          <ButtonLike isLiked={isLiked} user_id={user_id} tour_id={props?.id}/>
         </div>
       </div>
     </div>
