@@ -90,8 +90,7 @@ class GenerateTourRequest(BaseModel):
     data_start: str
     data_end: str
     location: str
-    weather: list = None
-    hobby: List[str]
+    hobbies: list
 
 
 class Places(BaseModel):
@@ -123,63 +122,13 @@ def is_alive():
 
 @router.post("/search_location", response_model=List[Tour])
 def generate(data: GenerateTourRequest):
+    print(data)
     import sqlite3
-
-    def print_entire_database(db_name="places.db"):
-        conn = sqlite3.connect(db_name)
-        cur = conn.cursor()
-        
-        # Получаем список всех таблиц
-        cur.execute("SELECT name FROM sqlite_master WHERE type='table'")
-        tables = cur.fetchall()
-        
-        print(f"\nСодержимое базы данных '{db_name}':")
-        print("=" * 50)
-        
-        for table in tables:
-            table_name = table[0]
-            print(f"\nТаблица: {table_name}")
-            print("-" * 40)
-            
-            # Получаем структуру таблицы
-            cur.execute(f"PRAGMA table_info({table_name})")
-            columns = cur.fetchall()
-            column_names = [col[1] for col in columns]
-            print("Структура:", ", ".join(column_names))
-            
-            # Получаем содержимое таблицы
-            try:
-                cur.execute(f"SELECT * FROM {table_name}")
-                rows = cur.fetchall()
-                
-                if not rows:
-                    print("Таблица пуста")
-                    continue
-                    
-                # Выводим первые 5 строк (или все, если их меньше)
-                max_rows_to_show = min(5, len(rows))
-                print(f"Первые {max_rows_to_show} записей:")
-                
-                for i, row in enumerate(rows[:max_rows_to_show], 1):
-                    print(f"{i}. {row}")
-                    
-                if len(rows) > max_rows_to_show:
-                    print(f"... и еще {len(rows) - max_rows_to_show} записей")
-                    
-            except sqlite3.Error as e:
-                print(f"Ошибка при чтении таблицы {table_name}: {e}")
-        
-        conn.close()
-        print("\n" + "=" * 50 + "\n")
-
     # Пример использования
-    print_entire_database()
-
     print(data)
 
     city = data.location
-    weather_filters = data.weather or []
-    hobbies = [h.lower() for h in data.hobby]
+    hobbies = [h.lower() for h in data.hobbies]
     db_name = "places.db"
     table_name = f"places_{translit_name(city)}"
 
@@ -203,30 +152,6 @@ def generate(data: GenerateTourRequest):
     print(rows)
     conn.close()
 
-    # --- Фильтрация по погоде и хобби ---
-
-    def match_weather(place_cat: str) -> bool:
-        weather_map = {
-            'Ресторан': ['rain', 'snow'],
-            'Музей': ['rain', 'snow'],
-            'Историческое место': ['sun'],
-            'Парк': ['sun'],
-            'Достопримечательность': ['sun', 'snow']
-        }
-        allowed = weather_map.get(place_cat, ['sun', 'rain', 'snow'])
-        return not weather_filters or any(w in allowed for w in weather_filters)
-
-    def match_hobby(place_cat: str) -> bool:
-        hobby_map = {
-            'Ресторан': ['еда', 'кухня'],
-            'Музей': ['искусство', 'история'],
-            'Историческое место': ['история', 'архитектура'],
-            'Парк': ['природа', 'отдых'],
-            'Достопримечательность': ['фото', 'туризм']
-        }
-        tags = hobby_map.get(place_cat, [])
-        return any(h in tags for h in hobbies)
-
     def calculate_avg_rating(places: List[Places]) -> float:
         ratings = []
         for p in places:
@@ -236,36 +161,13 @@ def generate(data: GenerateTourRequest):
                 continue
         return round(sum(ratings) / len(ratings), 2) if ratings else 4.0
 
-    # --- Фильтрация всех подходящих мест ---
     today = datetime.now().date().isoformat()
     filtered_places = []
 
     def get_wikimedia_image_url(place_name):
-        # url = "https://en.wikipedia.org/w/api.php"
-        # params = {
-        #     "action": "query",
-        #     "format": "json",
-        #     "prop": "pageimages",
-        #     "titles": place_name,
-        #     "pithumbsize": 400
-        # }
-        # try:
-        #     response = requests.get(url, params=params, timeout=2)
-        #     data = response.json()
-        #     pages = data.get("query", {}).get("pages", {})
-        #     for page in pages.values():
-        #         if "thumbnail" in page:
-        #             return page["thumbnail"]["source"]
-        # except Exception as e:
-        #     print("Wiki image error:", e)
         return "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSGKPdm1NTslz32yLdZKLBH41Pu4fPBu7ggAQ&s"
 
     for (id_, name, category, rating, hours, lat, lon) in rows:
-        '''if not match_weather(category):
-            continue
-        if not match_hobby(category):
-            continue'''
-
         # Генерация короткого описания
         try:
             short_desc = llm.generate_short_description(name, category)
