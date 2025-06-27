@@ -27,7 +27,7 @@ h3, p {
 
 .bothInfo {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     justify-content: space-between;
 }
 

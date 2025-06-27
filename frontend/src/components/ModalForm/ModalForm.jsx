@@ -23,6 +23,19 @@ const dateToBd = (date) => {
     return `${d}.${m}.${y}`
 }
 
+function getRes(data) {
+  const dateObj = new Date(data);
+
+    // Получаем день, месяц и год (учитывая, что месяц начинается с 0)
+    const day = String(dateObj.getUTCDate()).padStart(2, "0");
+    const month = String(dateObj.getUTCMonth() + 1).padStart(2, "0");
+    const year = dateObj.getUTCFullYear();
+
+    // Формируем строку в формате dd:mm:yyyy
+    const formattedDate = `${day}.${month}.${year}`;
+    return formattedDate;
+}
+
 
 const end_date = (new Date()).getTime() + 432000 * 1000;
 
@@ -49,8 +62,10 @@ const ModalForm = ({setModal, setListTour}) => {
                 body: JSON.stringify(
                   // eslint-disable-next-line no-constant-binary-expression
                   {...form, 
-                    data_start: Object.prototype.toString.call(form?.data_start) === "[object Date]"  ? dateToBd(form?.date_start) : form?.data_start,
-                    data_end: Object.prototype.toString.call(form?.data_end) === "[object Date]"  ? dateToBd(form?.date_end) : form?.data_end,
+                    // data_start: Object.prototype.toString.call(form?.data_start) === "[object Date]"  ? dateToBd(form?.date_start) : form?.data_start,
+                    // data_end: Object.prototype.tosString.call(form?.data_end) === "[object Date]"  ? dateToBd(form?.date_end) : form?.data_end,
+                    data_start: getRes(form?.data_start),
+                    data_end: getRes(form?.data_end),
                     }
                 //   ?? { 
                 //   user_id: 2,
