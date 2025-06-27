@@ -198,20 +198,29 @@ def recommend_tours(request: models.TourRecommendationRequest):
 
 @app.get("/user_recommendations/{user_id}", response_model=models.RecommendationResponse)
 def user_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
-    """Get personalized tour recommendations for user"""
+    """Get personalized tour recommendations for user via AI_service"""
+    interests = get_user_interests(user_id)
+    visited_cities = get_visited_cities(user_id)
+    survey_result = get_user_survey(user_id)
+    if survey_result["status"] != "success":
+        raise HTTPException(status_code=404, detail="User survey not found")
+    survey = survey_result["data"]
+    ai_url = os.getenv('AI_CITIES_URL', 'http://127.0.0.1:8002/api/v1/recommend_cities')
+    payload = {
+        "user_id": user_id,
+        "interests": interests,
+        "visited_cities": visited_cities,
+        "survey": survey,
+        "n": max_results
+    }
+    response = requests.post(ai_url, json=payload)
+    if response.status_code != 200:
+        raise HTTPException(status_code=502, detail=f"AI_service error: {response.text}")
     try:
-        # Recommendations are dynamic, so we get them first
-        recommended_tours = get_recommended_tours(user_id, max_results=max_results)
-        if not recommended_tours:
-            recommended_tours = get_fallback_recommendations(max_results)
-        # Check favorite status for recommended tours
-        favorite_tour_ids = get_user_favorite_tour_ids(user_id)
-        for tour_item in recommended_tours:
-            if tour_item.tour_id in favorite_tour_ids:
-                tour_item.is_favorite = True
-        return models.RecommendationResponse(tours=recommended_tours, message="OK")
+        result = response.json()
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        raise HTTPException(status_code=500, detail=f"AI_service returned invalid JSON: {e}")
+    return result
 
 @app.get("/city_recommendations/{user_id}", response_model=models.RecommendationResponse)
 def city_recommendations(user_id: int, max_results: int = Query(5, ge=1, le=20)):
