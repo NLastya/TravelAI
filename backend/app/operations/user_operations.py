@@ -144,43 +144,46 @@ def get_user_survey(user_id: int):
         if row:
             survey_data = {
                 "user_id": user_id,
-                "gender": row[0],
-                "age_group": row[1],
-                "cities_5": row[2],
-                "cities_4": row[3],
-                "cities_3": row[4],
-                "cities_2": row[5],
-                "cities_1": row[6],
-                "izbrannoe": row[7],
-                "cities_prosmotr_more": row[8],
-                "cities_prosmotr_less": row[9],
-                "poznavatelnyj_kulturno_razvlekatelnyj": bool(row[10]),
-                "delovoy": bool(row[11]),
-                "etnicheskiy": bool(row[12]),
-                "religioznyj": bool(row[13]),
-                "sportivnyj": bool(row[14]),
-                "obrazovatelnyj": bool(row[15]),
-                "ekzotic": bool(row[16]),
-                "ekologicheskiy": bool(row[17]),
-                "selskij": bool(row[18]),
-                "lechebno_ozdorovitelnyj": bool(row[19]),
-                "sobytijnyj": bool(row[20]),
-                "gornolyzhnyj": bool(row[21]),
-                "morskie_kruizy": bool(row[22]),
-                "plyazhnyj_otdykh": bool(row[23]),
-                "s_detmi": bool(row[24]),
-                "s_kompaniej_15_24": bool(row[25]),
-                "s_kompaniej_25_44": bool(row[26]),
-                "s_kompaniej_45_66": bool(row[27]),
-                "s_semej": bool(row[28]),
-                "v_odinochku": bool(row[29]),
-                "paroj": bool(row[30]),
-                "kuhnya": bool(row[31])
+                "gender": row[0] if row[0] is not None else None,
+                "age_group": row[1] if row[1] is not None else None,
+                "cities_5": row[2] if row[2] is not None else "",
+                "cities_4": row[3] if row[3] is not None else "",
+                "cities_3": row[4] if row[4] is not None else "",
+                "cities_2": row[5] if row[5] is not None else "",
+                "cities_1": row[6] if row[6] is not None else "",
+                "izbrannoe": row[7] if row[7] is not None else "",
+                "cities_prosmotr_more": row[8] if row[8] is not None else "",
+                "cities_prosmotr_less": row[9] if row[9] is not None else "",
+                "poznavatelnyj_kulturno_razvlekatelnyj": bool(row[10]) if row[10] is not None else False,
+                "delovoy": bool(row[11]) if row[11] is not None else False,
+                "etnicheskiy": bool(row[12]) if row[12] is not None else False,
+                "religioznyj": bool(row[13]) if row[13] is not None else False,
+                "sportivnyj": bool(row[14]) if row[14] is not None else False,
+                "obrazovatelnyj": bool(row[15]) if row[15] is not None else False,
+                "ekzotic": bool(row[16]) if row[16] is not None else False,
+                "ekologicheskiy": bool(row[17]) if row[17] is not None else False,
+                "selskij": bool(row[18]) if row[18] is not None else False,
+                "lechebno_ozdorovitelnyj": bool(row[19]) if row[19] is not None else False,
+                "sobytijnyj": bool(row[20]) if row[20] is not None else False,
+                "gornolyzhnyj": bool(row[21]) if row[21] is not None else False,
+                "morskie_kruizy": bool(row[22]) if row[22] is not None else False,
+                "plyazhnyj_otdykh": bool(row[23]) if row[23] is not None else False,
+                "s_detmi": bool(row[24]) if row[24] is not None else False,
+                "s_kompaniej_15_24": bool(row[25]) if row[25] is not None else False,
+                "s_kompaniej_25_44": bool(row[26]) if row[26] is not None else False,
+                "s_kompaniej_45_66": bool(row[27]) if row[27] is not None else False,
+                "s_semej": bool(row[28]) if row[28] is not None else False,
+                "v_odinochku": bool(row[29]) if row[29] is not None else False,
+                "paroj": bool(row[30]) if row[30] is not None else False,
+                "kuhnya": row[31] if row[31] is not None else ""
             }
             return {"status": "success", "data": survey_data}
         else:
             return {"status": "error", "message": "Анкета не найдена"}
     except Exception as e:
+        import traceback
+        print(f"Error in get_user_survey for user_id {user_id}: {str(e)}")
+        print(f"Traceback: {traceback.format_exc()}")
         return {"status": "error", "message": str(e)}
     finally:
         conn.close()

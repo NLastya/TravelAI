@@ -34,8 +34,11 @@ class Tour(BaseModel):
     location: str
     rating: float
     relevance: float
+    url: Optional[str] = None
     places: List[Places] = None
+    categories: List[str] = None
     description: str = "Увлекательный тур для всей семьи!"
+    is_favorite: Optional[bool] = False
 
 class GenerateTourRequest(BaseModel):
     user_id: int
@@ -170,7 +173,9 @@ class CityAnalytics(BaseModel):
     last_viewed: Optional[str] = None
 
 class CityAnalyticsResponse(BaseModel):
-    analytics: List[CityAnalytics]
+    cities_prosmotr_more: List[str]
+    cities_prosmotr_less: List[str]
+    total_cities_viewed: int
 
 class ActiveViewsResponse(BaseModel):
     active_cities: str
