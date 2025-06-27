@@ -7,6 +7,7 @@ import VerticalCard from '../components/VerticalCard/VerticalCard';
 import { notification } from 'antd';
 import Footer from '../components/Footer/Footer'
 import { HOST_URL } from '../config';
+import { useAuth } from "../hooks/useAuth";
 
 
 const fetchFunc = () => {};
@@ -15,7 +16,7 @@ const SearchPage = (props) => {
     const [isLoading, setIsLoading] = useState(false);
     const [listTours, setListTour] = useState([{date: '04.01.25'}]);
     const [form, setForm] = useState({location: '', date: '', user_id: 1})
-
+     const {user_id} = useAuth();
     const [api, contextHolder] = notification.useNotification();
 
     const listToursMap = (props?.listTours).map(item => (<VerticalCard key={item.key} {...item}/>) )

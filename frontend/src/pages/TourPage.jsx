@@ -90,6 +90,7 @@ const TourPage = (props) => {
           </div>
         </div>
         <div className={style.cardsTourDiv}>
+          
         </div>
         <div className={style.disc}>
           <h3 className={style.h3dsic}>Описание</h3>

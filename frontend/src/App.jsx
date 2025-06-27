@@ -17,14 +17,14 @@ import MainPage from "./pages/mainPage";
 import FavoriteToursPage from "./pages/favoritetourspage";
 
 function App() {
-  const { isLogged, login, logout } = useAuth();
+  useAuth();
   const [listTours, setListTour] = useState([]);
 
   return (
     <>
       <HeroUIProvider>
+      <AuthProvider>
         <BrowserRouter>
-          <AuthProvider>
             <Routes>
               <Route
                 path="/tours"
@@ -52,8 +52,8 @@ function App() {
               <Route path="/registration" element={<Registration />} />
               <Route path="/return-password" element={<Developing />} />
             </Routes>
-          </AuthProvider>
         </BrowserRouter>
+        </AuthProvider>
       </HeroUIProvider>
     </>
   );

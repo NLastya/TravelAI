@@ -7,4 +7,7 @@ export default defineConfig({
   server: { port:  5172, },
   plugins: [react(),  tailwindcss(),],
   base: '',
+  build: {
+    target: 'esnext',
+  },
 })

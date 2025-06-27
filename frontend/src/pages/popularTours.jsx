@@ -10,8 +10,9 @@ import { HOST_URL } from "../config";
 import PaginationCustom from "../components/pagination/pagination";
 import Loader from '../components/Loader/loader';
 import { getUserFavorites } from "../helpers/fetchRoute";
+import { useAuth } from "../hooks/useAuth";
 
-const PopularTours = ({user_id}, ...props) => {
+const PopularTours = (...props) => {
   const [isLoading, setIsLoading] = useState(false);
   const [listTours, setListTour] = useState([
     {
@@ -39,6 +40,7 @@ const PopularTours = ({user_id}, ...props) => {
       location: "Сибирь",
     },
   ]);
+  const {user_id} = useAuth();
   const [form, setForm] = useState({ location: "", date: "" });
   const [api, contextHolder] = notification.useNotification();
   const [favoriteList, setFavoriteList] = useState([])
@@ -50,7 +52,6 @@ const PopularTours = ({user_id}, ...props) => {
 
   useEffect(() => {
     setIsLoading(true);
-    console.log('yes')
 
     setTimeout(()=> {setIsLoading(false);}, 1000)
     fetch(`/api/list_popular`, {

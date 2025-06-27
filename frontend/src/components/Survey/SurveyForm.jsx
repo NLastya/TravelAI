@@ -6,16 +6,20 @@ import { LOCALSTORAGEAUTH } from '../../config';
 import LS from '../../store/LS';
 import { HOST_URL } from '../../config';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../../hooks/useAuth';
 
 
 const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
   const navigate = useNavigate();
   const [isSuccessful, setIsSuccessfull] = useState(false);
+  const {setUserId} = useAuth();
 
   const postRegistration = (form, setIsSuccessfull) => {
         if(LOCALSTORAGEAUTH){
             LS.set('user', JSON.stringify({login: form.login, password: form.password, city: form.city, name: form.name}))
-            navigate('/user/1')
+            setUserId(2)
+            const user_id = 2
+            navigate(`/user/${user_id}`)
         }
         else{
         fetch(`/api/register`,
@@ -30,6 +34,8 @@ const SurveyForm = ({form, setForm, isLogged, setIsLogged}, ...props) => {
             if(!res.ok)
                 throw new Error('error connection')
         }).then(body => {
+          const userId = body?.user_id
+          setUserId(userId);
           // setIsSuccessfull(true)
             // setIsLogged(true)
             navigate('/popularTours');

@@ -6,22 +6,29 @@ import { HOST_URL } from '../config';
 import { useNavigate } from 'react-router-dom';
 import LS from '../store/LS';
 import {LOCALSTORAGEAUTH} from '../config';
+import { useAuth } from '../hooks/useAuth';
 
 
 const Login = (props) => {
     const [form, setForm] = useState({login: '', password: ''});
     const [isLogged, setIsLogged] = useState(false);
-    const [userId, setUserId] = useState(-1);
+    // const [userId, setUserId] = useState(-1);
     const navigate = useNavigate();
+      const {setUserId} = useAuth();
+
+    // const {user_id} = useAuth();
 
     const handleClick = (e) => {
         if(LOCALSTORAGEAUTH){
             const user = LS.get('user')
-            if (user.login === form.login && user.password === user.password)
+            if (user.login === form.login && user.password === user.password){
                 navigate('/popularTours')
+                setUserId(2)
+            }
             else
                 getAlert('Ошибка при попытке войти', 'Ошибка', 'messages')
         }
+        else{
             
         e.preventDefault(); 
         fetch(`/api/login`, {
@@ -40,12 +47,13 @@ const Login = (props) => {
         .then(body => {
             setIsLogged(true);
             console.log(body);
-            setUserId(body?.user_id);
+            setUserId(body?.user_id ?? 1);
             navigate('/popularTours');
         })
         .catch(err => {
             getAlert('Ошибка при попытке войти', err.message, 'messages');
         });
+    }
     }
 
     return (<div className={style.main}>
